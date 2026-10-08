@@ -1,0 +1,115 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản - WorkConnect";
+}
+
+<link rel="stylesheet" href="~/css/register.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<div class="register-container">
+    <h2 class="page-title">Tham gia ngay hôm nay</h2>
+
+    <div class="register-card">
+        <!-- Cột bên trái: Giới thiệu tính năng -->
+        <div class="left-panel">
+            <div class="feature-item">
+                <div class="feature-icon icon-blue">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>THÔNG BÁO VIỆC LÀM</h3>
+                    <p>Được cập nhật các cơ hội việc làm mới nhất từ nhiều công ty hàng đầu</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon icon-green">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>KIẾM VIỆC DỄ DÀNG</h3>
+                    <p>Tìm được công việc bạn yêu thích phù hợp với kỹ năng và tiêu chí bạn quan tâm</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon icon-orange">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>ỨNG TUYỂN NHANH CHÓNG</h3>
+                    <p>Dễ dàng ứng tuyển nhiều vị trí mà không cần mất nhiều thời gian</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột bên phải: Form đăng ký -->
+        <div class="right-panel">
+            <div class="tab-header">
+                <a asp-action="Login" class="tab-item">ĐĂNG NHẬP</a>
+                <a asp-action="Register" class="tab-item active">ĐĂNG KÝ</a>
+            </div>
+
+            <form asp-action="Register" method="post" class="register-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <input asp-for="FirstName" class="form-control" placeholder="* Tên" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input asp-for="LastName" class="form-control" placeholder="* Họ và tên lót" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <input asp-for="Email" class="form-control" placeholder="* Email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group password-group">
+                    <input asp-for="Password" type="password" id="Password" class="form-control" placeholder="* Mật khẩu" />
+                    <i class="fa-regular fa-eye-slash toggle-password" onclick="togglePasswordVisibility('Password', this)"></i>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group password-group">
+                    <input asp-for="ConfirmPassword" type="password" id="ConfirmPassword" class="form-control" placeholder="* Xác nhận mật khẩu" />
+                    <i class="fa-regular fa-eye-slash toggle-password" onclick="togglePasswordVisibility('ConfirmPassword', this)"></i>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" asp-for="AgreeTerms" />
+                        <span class="checkmark"></span>
+                        <span class="terms-text">
+                            Tôi xác nhận đã được thông báo về việc xử lý thông tin cá nhân của mình theo <b>Thông báo về việc xử lý dữ liệu cá nhân</b> của WorkConnect.
+                            Tôi đồng thời xác nhận đã đọc, hiểu, và đồng ý cung cấp thông tin cá nhân và đồng ý với việc xử lý dữ liệu cá nhân của mình theo 
+                            <a href="#">Điều Khoản Sử Dụng</a> và <a href="#">Chính Sách Quyền Riêng Tư</a> của WorkConnect.
+                        </span>
+                    </label>
+                    <span asp-validation-for="AgreeTerms" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn-submit">ĐĂNG KÝ</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            iconElement.classList.remove("fa-eye-slash");
+            iconElement.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            iconElement.classList.remove("fa-eye");
+            iconElement.classList.add("fa-eye-slash");
+        }
+    }
+</script>

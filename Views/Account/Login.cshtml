@@ -1,0 +1,100 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập - WorkConnect";
+}
+
+<link rel="stylesheet" href="~/css/register.css" />
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+
+<div class="register-container">
+    <h2 class="page-title">Chào mừng bạn tham gia WorkConnect</h2>
+
+    <div class="register-card">
+        <!-- Cột bên trái: Giới thiệu tính năng -->
+        <div class="left-panel">
+            <div class="feature-item">
+                <div class="feature-icon icon-blue">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>THÔNG BÁO VIỆC LÀM</h3>
+                    <p>Được cập nhật các cơ hội việc làm mới nhất từ nhiều công ty hàng đầu</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon icon-green">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>KIẾM VIỆC DỄ DÀNG</h3>
+                    <p>Tìm được công việc bạn yêu thích phù hợp với kỹ năng và tiêu chí bạn quan tâm</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon icon-orange">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </div>
+                <div class="feature-text">
+                    <h3>ỨNG TUYỂN NHANH CHÓNG</h3>
+                    <p>Dễ dàng ứng tuyển nhiều vị trí mà không cần mất nhiều thời gian</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột bên phải: Form đăng nhập -->
+        <div class="right-panel">
+            <div class="tab-header">
+                <a asp-action="Login" class="tab-item active">ĐĂNG NHẬP</a>
+                <a asp-action="Register" class="tab-item">ĐĂNG KÝ</a>
+            </div>
+
+            <form asp-action="Login" method="post" class="register-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <input asp-for="Email" class="form-control" placeholder="Vui lòng nhập email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group password-group">
+                    <input asp-for="Password" type="password" id="LoginPassword" class="form-control" placeholder="Vui lòng nhập mật khẩu" />
+                    <i class="fa-regular fa-eye-slash toggle-password" onclick="togglePasswordVisibility('LoginPassword', this)"></i>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group checkbox-group" style="margin-top: 15px; margin-bottom: 20px;">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" asp-for="RememberMe" />
+                        <span class="checkmark"></span>
+                        <span class="terms-text" style="font-size: 13px; color: #333;">
+                            Tự động đăng nhập
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit">ĐĂNG NHẬP</button>
+
+                <div style="margin-top: 20px; text-align: left;">
+                    <a asp-action="ForgotPassword" class="forgot-password-link">Quên mật khẩu?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            iconElement.classList.remove("fa-eye-slash");
+            iconElement.classList.add("fa-eye");
+        } else {
+            input.type = "password";
+            iconElement.classList.remove("fa-eye");
+            iconElement.classList.add("fa-eye-slash");
+        }
+    }
+</script>

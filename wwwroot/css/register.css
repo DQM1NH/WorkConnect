@@ -1,0 +1,261 @@
+body {
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.register-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 15px;
+}
+
+.page-title {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #111;
+    margin-bottom: 30px;
+}
+
+.register-card {
+    display: flex;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Left Panel */
+.left-panel {
+    flex: 1;
+    background-color: #fdfdfd;
+    padding: 40px 30px;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.icon-blue { background-color: #2b569a; }
+.icon-green { background-color: #8bc34a; }
+.icon-orange { background-color: #f39c12; }
+
+.feature-text h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+    color: #222;
+}
+
+.feature-text p {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Right Panel */
+.right-panel {
+    flex: 1.2;
+    padding: 30px 40px;
+}
+
+.tab-header {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 20px;
+}
+
+.tab-item {
+    flex: 1;
+    text-align: center;
+    padding-bottom: 10px;
+    text-decoration: none;
+    color: #888;
+    font-weight: bold;
+    font-size: 14px;
+    position: relative;
+}
+
+.tab-item.active {
+    color: #000;
+}
+
+.tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #008080;
+}
+
+.social-title {
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-social {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-facebook { background-color: #3b5998; }
+.btn-google { background-color: #ea4335; }
+
+.divider {
+    text-align: center;
+    position: relative;
+    margin: 20px 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: #eee;
+}
+
+.divider span {
+    background: #fff;
+    padding: 0 15px;
+    color: #888;
+    font-size: 12px;
+    position: relative;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 13px;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-bottom-color: #00bfa5;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 5px;
+    top: 8px;
+    color: #888;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.checkbox-group {
+    margin-top: 20px;
+    margin-bottom: 25px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 11px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.custom-checkbox input {
+    margin-top: 3px;
+}
+
+.terms-text a {
+    color: #008080;
+    text-decoration: none;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: #00bfa5;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #009688;
+}
+
+.forgot-password-link {
+    color: #2b569a;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-password-link:hover {
+    color: #008080;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .register-card {
+        flex-direction: column;
+    }
+    .left-panel {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
+}

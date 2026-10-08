@@ -1,0 +1,243 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+/* HEADER */
+.main-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    height: 65px;
+}
+
+/* Logo */
+.brand-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2b569a;
+    text-decoration: none;
+}
+
+.brand-logo span {
+    color: #00bfa5;
+}
+
+/* Navigation Menu */
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 18px;
+}
+
+.main-nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.main-nav a:hover {
+    color: #008080;
+}
+
+/* Actions right side */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.nav-action-item {
+    text-decoration: none;
+    color: #555;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-action-item:hover {
+    color: #008080;
+}
+
+/* Employer Button */
+.btn-employer {
+    background-color: #2b569a;
+    color: #fff !important;
+    padding: 8px 14px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+}
+
+.btn-employer small {
+    font-size: 10px;
+    font-weight: normal;
+    opacity: 0.85;
+}
+
+.btn-employer:hover {
+    background-color: #1e3f73;
+}
+
+/* FOOTER */
+.main-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 40px 0 20px 0;
+    color: #555;
+    font-size: 13px;
+    margin-top: 50px;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.footer-brand {
+    margin-bottom: 25px;
+}
+
+.footer-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2b569a;
+    margin: 0;
+}
+
+.footer-logo span {
+    color: #00bfa5;
+}
+
+.footer-tagline {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.footer-links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.footer-col h4 {
+    font-size: 12px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 8px;
+}
+
+.footer-col ul li a {
+    color: #666;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-col ul li a:hover {
+    color: #008080;
+}
+
+.app-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-app {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #000;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 11px;
+    width: fit-content;
+}
+
+.social-icons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.social-icons a {
+    color: #555;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+.social-icons a:hover {
+    color: #008080;
+}
+
+.footer-bottom {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 15px;
+    text-align: center;
+    font-size: 11px;
+    color: #888;
+    line-height: 1.6;
+}
