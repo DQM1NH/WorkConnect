@@ -1,0 +1,56 @@
+/* Module Ứng viên - Tìm kiếm / chi tiết việc làm */
+.job-page { padding: 24px 0; }
+.job-page-title { font-size: 26px; font-weight: bold; color: #111; margin-bottom: 20px; }
+
+/* Bộ lọc */
+.job-filter { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,.05); }
+.job-field { margin-bottom: 12px; }
+.job-field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #333; }
+.job-salary { display: flex; align-items: center; gap: 6px; }
+.job-filter-actions { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.btn-job-search { display: inline-block; background: #2b569a; color: #fff; border: 0; border-radius: 6px;
+                  padding: 9px 16px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.btn-job-search:hover { background: #21457d; color: #fff; }
+.btn-job-reset { font-size: 13px; color: #555; }
+.job-loading { color: #2b569a; font-size: 14px; margin-bottom: 8px; }
+
+/* Danh sách kết quả */
+.job-count { margin-bottom: 12px; color: #333; }
+.job-list { display: flex; flex-direction: column; gap: 12px; }
+.job-card { display: flex; justify-content: space-between; gap: 16px; background: #fff; border-radius: 8px;
+            padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.05); border: 1px solid #eee; }
+.job-card:hover { border-color: #2b569a; }
+.job-card-title { font-size: 18px; margin: 0 0 4px; }
+.job-card-title a { color: #2b569a; text-decoration: none; }
+.job-card-title a:hover { text-decoration: underline; }
+.job-card-company { color: #555; margin-bottom: 8px; }
+.job-tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: #555; }
+.job-card-side { text-align: right; flex-shrink: 0; }
+.job-salary-text { font-size: 18px; font-weight: bold; color: #1a9a4a; }
+.job-deadline { font-size: 13px; color: #777; margin-top: 6px; }
+.job-empty { text-align: center; background: #fff; border-radius: 8px; padding: 40px 16px; color: #666; }
+.job-empty i { font-size: 32px; color: #bbb; margin-bottom: 10px; }
+
+/* Chi tiết */
+.job-back { text-decoration: none; color: #2b569a; }
+.job-detail, .job-side-box { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.job-side-box { margin-bottom: 16px; }
+.job-detail-title { font-size: 24px; font-weight: bold; margin-bottom: 6px; }
+.job-detail h2 { font-size: 18px; margin: 20px 0 8px; color: #2b569a; }
+.job-text { white-space: pre-line; overflow-wrap: anywhere; }   /* giữ xuống dòng, vẫn được mã hóa an toàn */
+.job-notice { background: #fff4e5; border: 1px solid #ffd59a; color: #8a5a00; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+.job-info { list-style: none; padding: 0; margin: 12px 0 16px; }
+.job-info li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 14px; }
+.job-info span { color: #777; }
+.btn-job-apply { display: block; text-align: center; }
+.btn-job-apply.disabled { background: #bbb; cursor: not-allowed; }
+.job-side-title { font-size: 16px; margin-bottom: 8px; }
+.job-company-name { font-weight: bold; margin-bottom: 4px; }
+.job-company-addr { color: #555; font-size: 14px; }
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .job-card { flex-direction: column; }
+    .job-card-side { text-align: left; }
+    .job-detail-title { font-size: 20px; }
+}

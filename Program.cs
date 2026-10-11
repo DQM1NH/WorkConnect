@@ -1,7 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+using WorkConnect.Data;
+using WorkConnect.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// MVC (chỉ đăng ký một lần)
 builder.Services.AddControllersWithViews();
+
+// Kết nối CSDL SQL Server (chuỗi kết nối nằm trong appsettings.json hoặc User Secrets)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Tầng Service (Controller -> Service -> DbContext)
+builder.Services.AddScoped<IJobService, JobService>();
 
 var app = builder.Build();
 
@@ -24,6 +35,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

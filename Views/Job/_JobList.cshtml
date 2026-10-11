@@ -1,0 +1,42 @@
+@model List<JobListItem>
+
+<p class="job-count">Tìm thấy <strong>@Model.Count</strong> việc làm phù hợp</p>
+
+@if (Model.Count == 0)
+{
+    <div class="job-empty">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <p>Không tìm thấy việc làm phù hợp</p>
+        <small>Hãy thử xóa hoặc thay đổi bộ lọc để xem thêm kết quả.</small>
+    </div>
+}
+else
+{
+    <div class="job-list">
+        @foreach (var j in Model)
+        {
+            <article class="job-card">
+                <div class="job-card-main">
+                    <h2 class="job-card-title">
+                        <a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien">@j.TieuDe</a>
+                    </h2>
+                    <p class="job-card-company">@j.TenCongTy · @j.ViTri</p>
+                    <ul class="job-tags">
+                        <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
+                        <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
+                        <li><i class="fa-solid fa-building"></i> @j.HinhThuc</li>
+                        @if (!string.IsNullOrEmpty(j.KinhNghiem))
+                        {
+                            <li><i class="fa-solid fa-chart-line"></i> @j.KinhNghiem</li>
+                        }
+                        <li><i class="fa-solid fa-layer-group"></i> @j.NganhNghe</li>
+                    </ul>
+                </div>
+                <div class="job-card-side">
+                    <div class="job-salary-text">@j.LuongHienThi</div>
+                    <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
+                </div>
+            </article>
+        }
+    </div>
+}

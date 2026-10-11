@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WorkConnect.styles.css" asp-append-version="true" />
+    @if (ViewData["Description"] is string desc) { <meta name="description" content="@desc" /> }
 </head>
 <body>
     <header class="main-header">
