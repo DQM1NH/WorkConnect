@@ -1,0 +1,44 @@
+
+@model IEnumerable<WorkConnect.Models.Entities.TinTuyenDung>
+
+@{
+    ViewData["Title"] = "Danh sách tin tuyển dụng";
+}
+
+<div class="container mt-4">
+    <h2>Danh sách tin tuyển dụng</h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>Chưa có tin tuyển dụng.</p>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Mã tin</th>
+                    <th>Tiêu đề</th>
+                    <th>Vị trí</th>
+                    <th>Ngày đăng</th>
+                    <th>Hạn ứng tuyển</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var job in Model)
+                {
+                    <tr>
+                        <td>@job.MaTin</td>
+                        <td>@job.TieuDe</td>
+                        <td>@job.ViTri</td>
+                        <td>@job.NgayDang.ToString("dd/MM/yyyy")</td>
+                        <td>@job.HanUngTuyen.ToString("dd/MM/yyyy")</td>
+                        <td>@job.TrangThai</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
