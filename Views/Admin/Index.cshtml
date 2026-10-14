@@ -1,0 +1,236 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Trang quản trị - WorkConnect";
+}
+
+<link rel="stylesheet" href="~/css/admin.css" />
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+
+<div class="admin-dashboard-container">
+    <div class="admin-header">
+        <h1>Bảng điều khiển quản trị</h1>
+        <p>TỔNG QUAN HỆ THỐNG VÀ QUẢN LÝ TẬP TRUNG</p>
+    </div>
+
+    <!-- MODULE 1: THỐNG KÊ TỔNG QUAN (ĐÃ KẾT NỐI CSDL) -->
+    <div class="stats-grid">
+        <div class="stat-card border-blue">
+            <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-info">
+                <h3>@Model.TotalUsers.ToString("N0")</h3>
+                <p>Tổng người dùng</p>
+            </div>
+        </div>
+
+        <div class="stat-card border-green">
+            <div class="stat-icon icon-green"><i class="fa-solid fa-briefcase"></i></div>
+            <div class="stat-info">
+                <h3>@Model.TotalJobs.ToString("N0")</h3>
+                <p>Tin tuyển dụng</p>
+            </div>
+        </div>
+
+        <div class="stat-card border-orange">
+            <div class="stat-icon icon-orange"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="stat-info">
+                <h3>@Model.PendingApprovals.ToString("N0")</h3>
+                <p>Chờ duyệt nội dung</p>
+            </div>
+        </div>
+
+        <div class="stat-card border-purple">
+            <div class="stat-icon icon-purple"><i class="fa-solid fa-paper-plane"></i></div>
+            <div class="stat-info">
+                <h3>@Model.TotalApplications.ToString("N0")</h3>
+                <p>Lượt ứng tuyển</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHU VỰC TABS -->
+    <div class="admin-content-card">
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab(event, 'tab-content-approval')">
+                <i class="fa-solid fa-circle-check"></i> Duyệt nội dung <span class="badge-count">@Model.PendingApprovals</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-user-management')">
+                <i class="fa-solid fa-user-gear"></i> Quản lý người dùng
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'tab-content-management')">
+                <i class="fa-solid fa-user-gear"></i> Quản lý bài đăng
+            </button>
+        </div>
+
+        <!-- Module: Duyệt bài đăng -->
+        <div id="tab-content-approval" class="tab-content active">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Tiêu đề tin</th>
+                            <th>Nhà tuyển dụng</th>
+                            <th>Ngày đăng</th>
+                            <th>Ngành nghề</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.PendingJobs.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">Không có tin tuyển dụng nào chờ duyệt.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var job in Model.PendingJobs)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@job.Title</strong>
+                                        <br /><small class="text-muted">Mức lương: @job.SalaryRange</small>
+                                    </td>
+                                    <td>@job.EmployerName</td>
+                                    <td>@job.PostedDate.ToString("dd/MM/yyyy")</td>
+                                    <td><span class="category-tag">@job.Category</span></td>
+                                    <td><span class="badge badge-pending">Chờ duyệt</span></td>
+                                    <td class="action-buttons text-center">
+                                        <form asp-action="ApproveJob" asp-route-id="@job.JobId" method="post" style="display:inline;">
+                                            <button type="submit" class="btn-act btn-approve" onclick="return confirm('Xác nhận duyệt tin này?')">
+                                                <i class="fa-solid fa-check"></i> Duyệt
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Module Quản lý người dùng -->
+        <div id="tab-user-management" class="tab-content">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Ngày tham gia</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="user-info-cell">
+                                        <div class="user-avatar @(user.Role == "Nhà tuyển dụng" ? "avatar-emp" : "")">
+                                            @(string.IsNullOrEmpty(user.FullName) ? "U" : user.FullName.Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <strong>@user.FullName</strong>
+                                            <br /><small class="text-muted">ID: @user.UserId</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="role-tag @(user.Role == "Nhà tuyển dụng" ? "role-employer" : "role-candidate")">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td>@user.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge badge-active">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-pending" style="background:#f8d7da; color:#721c24;">Bị khóa</span>
+                                    }
+                                </td>
+                                <td class="action-buttons text-center">
+                                    <form asp-action="ToggleUserLock" asp-route-id="@user.RawId" method="post" style="display:inline;">
+                                        <button type="submit" class="btn-act btn-lock">
+                                            <i class="fa-solid fa-lock"></i> @(user.IsActive ? "Khóa" : "Mở khóa")
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Module: Quản lý bài đăng -->
+        <div id="tab-content-management" class="tab-content">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nhà tuyển dụng</th>
+                            <th>Tiêu đề</th>
+                            <th>Mức lương</th>
+                            <th>Số lượng</th>
+                            <th>Ngày đăng</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Content.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4">Chưa có bài đăng nào.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var content in Model.Content)
+                            {
+                                <tr>
+                                    <td>@content.EmployerName</td>
+                                    <td><strong>@content.Title</strong></td>
+                                    <td>@content.Salary</td>
+                                    <td>@content.Quantity</td>
+                                    <td>@content.PostedDate.ToString("dd/MM/yyyy")</td>
+                                    <td class="action-buttons text-center">
+                                        <form asp-action="ToggleJobVisibility" asp-route-id="@content.JobId" method="post" style="display:inline;">
+                                            <button type="submit" class="btn-act btn-lock"
+                                                    onclick="return confirm('@(content.IsHidden ? "Hiện lại bài đăng này?" : "Ẩn bài đăng này?")')">
+                                                <i class="fa-solid @(content.IsHidden ? "fa-eye" : "fa-eye-slash")"></i> @(content.IsHidden ? "Hiện" : "Ẩn")
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
