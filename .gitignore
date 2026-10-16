@@ -1,8 +1,81 @@
+
+# ==========================================
+# .NET / ASP.NET Core
+# ==========================================
+
+# Build output
 [Bb]in/
 [Oo]bj/
 
+# Visual Studio cache và cấu hình cá nhân
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# ASP.NET Core static web assets generated files
+**/staticwebassets.build.json
+**/staticwebassets.development.json
+**/staticwebassets.pack.json
+**/staticwebassets.publish.json
+**/staticwebassets.removed.txt
+
+# Compiled files
 *.dll
 *.exe
 *.pdb
+*.cache
+*.ilk
+*.obj
+*.tmp
+*.temp
 
-.vs/
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Publish output
+publish/
+artifacts/
+**/PublishProfiles/
+
+# Logs
+*.log
+logs/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==========================================
+# Secrets và thông tin môi trường
+# ==========================================
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local development settings
+appsettings.Development.json
+secrets.json
+
+# ==========================================
+# Database files (nếu chỉ dùng local)
+# ==========================================
+
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
