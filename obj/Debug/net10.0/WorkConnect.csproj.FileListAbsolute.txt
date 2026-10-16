@@ -155,7 +155,7 @@ D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\scopedcss\bundle\WorkConnect.styles.css
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\scopedcss\projectbundle\WorkConnect.bundle.scp.css
-D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\compressed\igvre8vozy-{0}-t6r117hhe0-t6r117hhe0.gz
+D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\compressed\igvre8vozy-{0}-3yfuqvrr15-3yfuqvrr15.gz
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\compressed\y8kxqkc6q9-{0}-istbqtslxs-istbqtslxs.gz
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\compressed\l3g81a9kot-{0}-3uq9x3ktax-3uq9x3ktax.gz
 D:\Web_nâng_cao\WorkConnect\obj\Debug\net10.0\compressed\g1ay2f5gtz-{0}-bf8lz946nb-bf8lz946nb.gz

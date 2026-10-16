@@ -12,6 +12,19 @@
         <p>TỔNG QUAN HỆ THỐNG VÀ QUẢN LÝ TẬP TRUNG</p>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div style="padding:12px 16px;margin-bottom:16px;border-radius:6px;background:#d4edda;color:#155724;">
+            <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div style="padding:12px 16px;margin-bottom:16px;border-radius:6px;background:#f8d7da;color:#721c24;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["Error"]
+        </div>
+    }
+
     <!-- MODULE 1: THỐNG KÊ TỔNG QUAN (ĐÃ KẾT NỐI CSDL) -->
     <div class="stats-grid">
         <div class="stat-card border-blue">
@@ -50,19 +63,22 @@
     <!-- KHU VỰC TABS -->
     <div class="admin-content-card">
         <div class="tab-navigation">
-            <button class="tab-btn active" onclick="switchTab(event, 'tab-content-approval')">
+            <button class="tab-btn @(Model.ActiveTab == "approval" ? "active" : "")" onclick="switchTab(event, 'tab-content-approval', 'approval')">
                 <i class="fa-solid fa-circle-check"></i> Duyệt nội dung <span class="badge-count">@Model.PendingApprovals</span>
             </button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-user-management')">
+            <button class="tab-btn @(Model.ActiveTab == "users" ? "active" : "")" onclick="switchTab(event, 'tab-user-management', 'users')">
                 <i class="fa-solid fa-user-gear"></i> Quản lý người dùng
             </button>
-            <button class="tab-btn" onclick="switchTab(event, 'tab-content-management')">
+            <button class="tab-btn @(Model.ActiveTab == "content" ? "active" : "")" onclick="switchTab(event, 'tab-content-management', 'content')">
                 <i class="fa-solid fa-user-gear"></i> Quản lý bài đăng
+            </button>
+            <button class="tab-btn @(Model.ActiveTab == "applications" ? "active" : "")" onclick="switchTab(event, 'tab-applications', 'applications')">
+                <i class="fa-solid fa-paper-plane"></i> Đơn ứng tuyển
             </button>
         </div>
 
         <!-- Module: Duyệt bài đăng -->
-        <div id="tab-content-approval" class="tab-content active">
+        <div id="tab-content-approval" class="tab-content @(Model.ActiveTab == "approval" ? "active" : "")">
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
@@ -76,15 +92,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.PendingJobs.Any())
+                        @if (!Model.PendingJobs.Items.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center py-4">Không có tin tuyển dụng nào chờ duyệt.</td>
+                                <td colspan="6" class="text-center py-4">@(Model.PendingJobs.HasSearch ? "Không tìm thấy tin nào phù hợp." : "Không có tin tuyển dụng nào chờ duyệt.")</td>
                             </tr>
                         }
                         else
                         {
-                            @foreach (var job in Model.PendingJobs)
+                            @foreach (var job in Model.PendingJobs.Items)
                             {
                                 <tr>
                                     <td>
@@ -97,6 +113,7 @@
                                     <td><span class="badge badge-pending">Chờ duyệt</span></td>
                                     <td class="action-buttons text-center">
                                         <form asp-action="ApproveJob" asp-route-id="@job.JobId" method="post" style="display:inline;">
+                                        <input type="hidden" name="returnUrl" />
                                             <button type="submit" class="btn-act btn-approve" onclick="return confirm('Xác nhận duyệt tin này?')">
                                                 <i class="fa-solid fa-check"></i> Duyệt
                                             </button>
@@ -108,10 +125,12 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Phân trang -->
+            @await Html.PartialAsync("_AdminPager", Model.PendingJobs)
         </div>
 
         <!-- Module Quản lý người dùng -->
-        <div id="tab-user-management" class="tab-content">
+        <div id="tab-user-management" class="tab-content @(Model.ActiveTab == "users" ? "active" : "")">
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
@@ -125,7 +144,13 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in Model.Users)
+                        @if (!Model.Users.Items.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">@(Model.Users.HasSearch ? "Không tìm thấy người dùng nào phù hợp." : "Chưa có người dùng nào.")</td>
+                            </tr>
+                        }
+                        @foreach (var user in Model.Users.Items)
                         {
                             <tr>
                                 <td>
@@ -157,21 +182,37 @@
                                     }
                                 </td>
                                 <td class="action-buttons text-center">
-                                    <form asp-action="ToggleUserLock" asp-route-id="@user.RawId" method="post" style="display:inline;">
+                                    @if (user.Role == "Admin")
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                    else
+                                    {
+                                    <form asp-action="ToggleUserLock" asp-route-id="@user.RawId" method="post" style="display:inline;" onsubmit="return confirm('@(user.IsActive ? "Khóa tài khoản này?" : "Mở khóa tài khoản này?")');">
+                                        <input type="hidden" name="returnUrl" />
                                         <button type="submit" class="btn-act btn-lock">
-                                            <i class="fa-solid fa-lock"></i> @(user.IsActive ? "Khóa" : "Mở khóa")
+                                            <i class="fa-solid @(user.IsActive ? "fa-lock" : "fa-lock-open")"></i> @(user.IsActive ? "Khóa" : "Mở khóa")
                                         </button>
                                     </form>
+                                    <form asp-action="DeleteAccount" asp-route-id="@user.RawId" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài khoản này không?');">
+                                        <input type="hidden" name="returnUrl" />
+                                        <button type="submit" class="btn-act btn-delete">
+                                            <i class="fa-solid fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                    }
                                 </td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
+            <!-- Phân trang -->
+            @await Html.PartialAsync("_AdminPager", Model.Users)
         </div>
 
         <!-- Module: Quản lý bài đăng -->
-        <div id="tab-content-management" class="tab-content">
+        <div id="tab-content-management" class="tab-content @(Model.ActiveTab == "content" ? "active" : "")">
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
@@ -185,27 +226,40 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (!Model.Content.Any())
+                        @if (!Model.Content.Items.Any())
                         {
                             <tr>
-                                <td colspan="7" class="text-center py-4">Chưa có bài đăng nào.</td>
+                                <td colspan="6" class="text-center py-4">@(Model.Content.HasSearch ? "Không tìm thấy bài đăng nào phù hợp." : "Chưa có bài đăng nào.")</td>
                             </tr>
                         }
                         else
                         {
-                            @foreach (var content in Model.Content)
+                            @foreach (var content in Model.Content.Items)
                             {
                                 <tr>
                                     <td>@content.EmployerName</td>
-                                    <td><strong>@content.Title</strong></td>
+                                    <td>
+                                        <strong>@content.Title</strong>
+                                        @if (content.IsHidden)
+                                        {
+                                            <span class="badge" style="background:#e2e3e5; color:#383d41; margin-left:6px;">Đã ẩn</span>
+                                        }
+                                    </td>
                                     <td>@content.Salary</td>
                                     <td>@content.Quantity</td>
                                     <td>@content.PostedDate.ToString("dd/MM/yyyy")</td>
                                     <td class="action-buttons text-center">
                                         <form asp-action="ToggleJobVisibility" asp-route-id="@content.JobId" method="post" style="display:inline;">
-                                            <button type="submit" class="btn-act btn-lock"
-                                                    onclick="return confirm('@(content.IsHidden ? "Hiện lại bài đăng này?" : "Ẩn bài đăng này?")')">
+                                        <input type="hidden" name="returnUrl" />
+                                            <button type="submit" class="btn-act btn-lock" onclick="return confirm('@(content.IsHidden ? "Hiện lại bài đăng này?" : "Ẩn bài đăng này?")')">
                                                 <i class="fa-solid @(content.IsHidden ? "fa-eye" : "fa-eye-slash")"></i> @(content.IsHidden ? "Hiện" : "Ẩn")
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="DeleteJob" asp-route-id="@content.JobId" method="post" style="display:inline;">
+                                        <input type="hidden" name="returnUrl" />
+                                            <button type="submit" class="btn-act btn-delete" onclick="return confirm('Bạn có chắc chắn muốn xóa bài đăng này không? Hành động này có thể không khôi phục được!')">
+                                                <i class="fa-solid fa-trash"></i> Xóa
                                             </button>
                                         </form>
                                     </td>
@@ -215,22 +269,79 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Phân trang -->
+            @await Html.PartialAsync("_AdminPager", Model.Content)
+        </div>
+
+        <!-- Module Đơn ứng tuyển -->
+        <div id="tab-applications" class="tab-content @(Model.ActiveTab == "applications" ? "active" : "")">
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Ứng viên</th>
+                            <th>Liên hệ</th>
+                            <th>Vị trí ứng tuyển</th>
+                            <th>Nhà tuyển dụng</th>
+                            <th>Ngày nộp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Applications.Items.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4">@(Model.Applications.HasSearch ? "Không tìm thấy đơn ứng tuyển nào phù hợp." : "Chưa có đơn ứng tuyển nào.")</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var app in Model.Applications.Items)
+                            {
+                                <tr>
+                                    <td>#@app.ApplicationId</td>
+                                    <td>
+                                        <div class="user-info-cell">
+                                            <div class="user-avatar">@app.CandidateName.Substring(0, 1).ToUpper()</div>
+                                            <strong>@app.CandidateName</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @app.CandidateEmail
+                                        @if (!string.IsNullOrWhiteSpace(app.CandidatePhone))
+                                        {
+                                            <br /><small class="text-muted">@app.CandidatePhone</small>
+                                        }
+                                    </td>
+                                    <td><strong>@app.JobTitle</strong></td>
+                                    <td>@app.EmployerName</td>
+                                    <td>@app.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- Phân trang -->
+            @await Html.PartialAsync("_AdminPager", Model.Applications)
         </div>
     </div>
 </div>
 
 <script>
-    function switchTab(evt, tabName) {
-        let i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
-        }
-        tablinks = document.getElementsByClassName("tab-btn");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
+    function switchTab(evt, tabName, tabKey) {
+        document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.getElementById(tabName).classList.add("active");
         evt.currentTarget.classList.add("active");
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("tab", tabKey);
+        history.replaceState(null, "", url);
     }
+
+    document.addEventListener("submit", function (e) {
+        const field = e.target.querySelector && e.target.querySelector('input[name="returnUrl"]');
+        if (field) field.value = window.location.pathname + window.location.search;
+    }, true);
 </script>

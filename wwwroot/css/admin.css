@@ -281,3 +281,114 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
+
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-delete:hover {
+    background-color: #b02a37;
+    color: #fff;
+}
+
+/* ===== Tìm kiếm + phân trang ===== */
+.table-header-tools {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-search {
+    height: 36px;
+    padding: 0 14px;
+}
+
+.btn-clear-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #666;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.btn-clear-search:hover {
+    background: #eef0f3;
+    color: #333;
+}
+
+.search-box {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.result-count {
+    font-size: 12px;
+    color: #666;
+}
+
+.pager-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.pager-info {
+    font-size: 12px;
+    color: #666;
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pager-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dde1e6;
+    border-radius: 4px;
+    background: #fff;
+    color: #2b569a;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+a.pager-btn:hover {
+    background: #eef2f7;
+}
+
+.pager-btn.active {
+    background: #2b569a;
+    border-color: #2b569a;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pager-btn.disabled {
+    color: #b5bac1;
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.pager-ellipsis {
+    padding: 0 4px;
+    color: #888;
+}

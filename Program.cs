@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,26 @@ builder.Services
         options.Cookie.HttpOnly = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+        // Mỗi request kiểm tra lại: tài khoản bị khóa hoặc bị xóa thì hủy phiên đăng nhập ngay
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var idClaim = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out var userId))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<WorkConnectDbContext>();
+            var valid = await db.TaiKhoans.AsNoTracking().AnyAsync(u => u.MaTaiKhoan == userId && !u.BiKhoa);
+            if (!valid)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
     });
 
 var app = builder.Build();

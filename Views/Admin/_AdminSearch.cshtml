@@ -1,0 +1,74 @@
+@model PagedResultBase
+@functions {
+    string PageUrl(int p)
+    {
+        var parts = new List<string>();
+        foreach (var kv in Context.Request.Query)
+        {
+            if (kv.Key == Model.PageKey || kv.Key == "tab") continue;
+            foreach (var v in kv.Value)
+                parts.Add($"{Uri.EscapeDataString(kv.Key)}={Uri.EscapeDataString(v ?? string.Empty)}");
+        }
+        parts.Add($"tab={Model.Tab}");
+        if (p > 1) parts.Add($"{Model.PageKey}={p}");
+        return Url.Action("Index", "Admin") + "?" + string.Join("&", parts);
+    }
+}
+@{
+    // Cửa sổ số trang: luôn hiện trang đầu/cuối, và ±2 quanh trang hiện tại
+    var pages = new List<int>();
+    for (var i = 1; i <= Model.TotalPages; i++)
+    {
+        if (i == 1 || i == Model.TotalPages || Math.Abs(i - Model.Page) <= 2) pages.Add(i);
+    }
+}
+
+@if (Model.TotalItems > 0)
+{
+    <div class="pager-bar">
+        <span class="pager-info">
+            Hiển thị @Model.FirstItem.ToString("N0")–@Model.LastItem.ToString("N0") / @Model.TotalItems.ToString("N0")
+        </span>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="pager" aria-label="Phân trang">
+                @if (Model.HasPrevious)
+                {
+                    <a class="pager-btn" href="@PageUrl(Model.Page - 1)" title="Trang trước"><i class="fa-solid fa-chevron-left"></i></a>
+                }
+                else
+                {
+                    <span class="pager-btn disabled"><i class="fa-solid fa-chevron-left"></i></span>
+                }
+
+                @{ var prev = 0; }
+                @foreach (var p in pages)
+                {
+                    if (prev != 0 && p - prev > 1)
+                    {
+                        <span class="pager-ellipsis">…</span>
+                    }
+                    if (p == Model.Page)
+                    {
+                        <span class="pager-btn active" aria-current="page">@p</span>
+                    }
+                    else
+                    {
+                        <a class="pager-btn" href="@PageUrl(p)">@p</a>
+                    }
+                    prev = p;
+                }
+
+                @if (Model.HasNext)
+                {
+                    <a class="pager-btn" href="@PageUrl(Model.Page + 1)" title="Trang sau"><i class="fa-solid fa-chevron-right"></i></a>
+                }
+                else
+                {
+                    <span class="pager-btn disabled"><i class="fa-solid fa-chevron-right"></i></span>
+                }
+            </nav>
+        }
+    </div>
+}
