@@ -112,12 +112,39 @@
                                     <td><span class="category-tag">@job.Category</span></td>
                                     <td><span class="badge badge-pending">Chờ duyệt</span></td>
                                     <td class="action-buttons text-center">
-                                        <form asp-action="ApproveJob" asp-route-id="@job.JobId" method="post" style="display:inline;">
-                                        <input type="hidden" name="returnUrl" />
-                                            <button type="submit" class="btn-act btn-approve" onclick="return confirm('Xác nhận duyệt tin này?')">
-                                                <i class="fa-solid fa-check"></i> Duyệt
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn-act btn-view" onclick="openJobDetail(@job.JobId)">
+                                            <i class="fa-solid fa-eye"></i> Xem chi tiết
+                                        </button>
+
+                                        @* Nội dung chi tiết (đã được Razor encode) - modal sẽ lấy từ đây *@
+                                        <template id="job-detail-@job.JobId">
+                                            <h4 class="job-detail-title">@job.Title</h4>
+                                            <span class="badge badge-pending">Chờ duyệt</span>
+
+                                            <div class="job-detail-grid">
+                                                <div class="job-detail-item"><small>Nhà tuyển dụng</small><span>@job.EmployerName</span></div>
+                                                <div class="job-detail-item"><small>Ngành nghề</small><span>@job.Category</span></div>
+                                                <div class="job-detail-item"><small>Vị trí</small><span>@(string.IsNullOrWhiteSpace(job.Position) ? "Chưa cập nhật" : job.Position)</span></div>
+                                                <div class="job-detail-item"><small>Địa điểm</small><span>@job.Location</span></div>
+                                                <div class="job-detail-item"><small>Mức lương</small><span>@job.SalaryRange</span></div>
+                                                <div class="job-detail-item"><small>Số lượng tuyển</small><span>@job.Quantity</span></div>
+                                                <div class="job-detail-item"><small>Ngày đăng</small><span>@job.PostedDate.ToString("dd/MM/yyyy")</span></div>
+                                                <div class="job-detail-item"><small>Hạn ứng tuyển</small><span>@job.Deadline.ToString("dd/MM/yyyy")</span></div>
+                                                @if (!string.IsNullOrWhiteSpace(job.EmployerAddress))
+                                                {
+                                                    <div class="job-detail-item" style="grid-column: 1 / -1;"><small>Địa chỉ công ty</small><span>@job.EmployerAddress</span></div>
+                                                }
+                                            </div>
+
+                                            <div class="job-detail-section">
+                                                <h4>Mô tả công việc</h4>
+                                                <div class="job-detail-text">@(string.IsNullOrWhiteSpace(job.Description) ? "Chưa có mô tả." : job.Description)</div>
+                                            </div>
+                                            <div class="job-detail-section">
+                                                <h4>Yêu cầu công việc</h4>
+                                                <div class="job-detail-text">@(string.IsNullOrWhiteSpace(job.Requirements) ? "Chưa có yêu cầu." : job.Requirements)</div>
+                                            </div>
+                                        </template>
                                     </td>
                                 </tr>
                             }
@@ -328,6 +355,36 @@
     </div>
 </div>
 
+<!-- Modal xem chi tiết tin tuyển dụng -->
+<div id="jobDetailModal" class="job-modal-overlay" aria-hidden="true">
+    <div class="job-modal" role="dialog" aria-modal="true" aria-labelledby="jobDetailModalTitle">
+        <div class="job-modal-header">
+            <h3 id="jobDetailModalTitle">Chi tiết tin tuyển dụng</h3>
+            <button type="button" class="job-modal-close" onclick="closeJobDetail()" aria-label="Đóng">&times;</button>
+        </div>
+        <div class="job-modal-body" id="jobDetailModalBody"></div>
+        <div class="job-modal-footer">
+            <button type="button" class="btn-act btn-lock" onclick="closeJobDetail()">Đóng</button>
+
+            <form asp-action="RejectJob" method="post">
+                <input type="hidden" name="id" class="job-modal-id" />
+                <input type="hidden" name="returnUrl" />
+                <button type="submit" class="btn-act btn-reject" onclick="return confirm('Xác nhận từ chối tin này?')">
+                    <i class="fa-solid fa-xmark"></i> Từ chối
+                </button>
+            </form>
+
+            <form asp-action="ApproveJob" method="post">
+                <input type="hidden" name="id" class="job-modal-id" />
+                <input type="hidden" name="returnUrl" />
+                <button type="submit" class="btn-act btn-approve" onclick="return confirm('Xác nhận duyệt tin này?')">
+                    <i class="fa-solid fa-check"></i> Duyệt
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function switchTab(evt, tabName, tabKey) {
         document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
@@ -339,6 +396,31 @@
         url.searchParams.set("tab", tabKey);
         history.replaceState(null, "", url);
     }
+
+    const jobModal = document.getElementById("jobDetailModal");
+
+    function openJobDetail(jobId) {
+        const tpl = document.getElementById("job-detail-" + jobId);
+        if (!tpl) return;
+        document.getElementById("jobDetailModalBody").replaceChildren(tpl.content.cloneNode(true));
+        jobModal.querySelectorAll(".job-modal-id").forEach(i => i.value = jobId);
+        jobModal.classList.add("open");
+        jobModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeJobDetail() {
+        jobModal.classList.remove("open");
+        jobModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+    }
+
+    jobModal.addEventListener("click", function (e) {
+        if (e.target === jobModal) closeJobDetail();
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && jobModal.classList.contains("open")) closeJobDetail();
+    });
 
     document.addEventListener("submit", function (e) {
         const field = e.target.querySelector && e.target.querySelector('input[name="returnUrl"]');

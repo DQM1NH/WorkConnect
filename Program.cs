@@ -4,15 +4,29 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WorkConnect.Models;
 using WorkConnect.Models.Entities;
+using WorkConnect.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Đăng ký Email Service
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+// Cấu hình DbContext
 builder.Services.AddDbContext<WorkConnectDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews();
 
-// Băm mật khẩu (PBKDF2 + salt ngẫu nhiên) - có sẵn trong ASP.NET Core, không cần cài thêm package
+// 1. DỊCH VỤ SESSION (Thêm bộ nhớ đệm và cấu hình Session)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(15); // Thời gian Session hết hạn
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Băm mật khẩu (PBKDF2 + salt ngẫu nhiên)
 builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>();
 
 // Đăng nhập bằng cookie
@@ -61,6 +75,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// 2. MIDDLEWARE SESSION (Đặt giữa UseRouting và UseAuthentication)
+app.UseSession();
 
 app.UseAuthentication(); 
 app.UseAuthorization();

@@ -1,13 +1,7 @@
-
-# ==========================================
-# .NET / ASP.NET Core
-# ==========================================
-
 # Build output
 [Bb]in/
 [Oo]bj/
 
-# Visual Studio cache và cấu hình cá nhân
 .vs/
 *.user
 *.suo
@@ -57,10 +51,6 @@ logs/
 Thumbs.db
 Desktop.ini
 
-# ==========================================
-# Secrets và thông tin môi trường
-# ==========================================
-
 # Environment variables
 .env
 .env.*
@@ -69,10 +59,6 @@ Desktop.ini
 # Local development settings
 appsettings.Development.json
 secrets.json
-
-# ==========================================
-# Database files (nếu chỉ dùng local)
-# ==========================================
 
 *.mdf
 *.ldf

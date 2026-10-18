@@ -11,6 +11,7 @@ namespace WorkConnect.Controllers
     {
         private const string StatusDraft = "Bản nháp";
         private const string StatusOpen = "Đang tuyển";
+        private const string StatusRejected = "Từ chối";
         private readonly WorkConnectDbContext _context;
 
         public AdminController(WorkConnectDbContext context)
@@ -49,7 +50,10 @@ namespace WorkConnect.Controllers
                     j.MaTin, j.TieuDe,
                     Employer = j.NhaTuyenDung != null ? j.NhaTuyenDung.TenCongTy : null,
                     Category = j.NganhNghe != null ? j.NganhNghe.TenNganhNghe : null,
-                    j.NgayDang, j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan
+                    j.NgayDang, j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan,
+                    j.ViTri, j.SoLuongTuyen, j.HanUngTuyen, j.MoTaCongViec, j.YeuCauCongViec,
+                    Location = j.DiaDiem != null ? j.DiaDiem.TenDiaDiem : null,
+                    EmployerAddress = j.NhaTuyenDung != null ? j.NhaTuyenDung.DiaChi : null
                 });
 
             // ===== Tab "Quản lý bài đăng": toàn bộ tin, mọi trạng thái =====
@@ -139,7 +143,14 @@ namespace WorkConnect.Controllers
                         EmployerName = j.Employer ?? "N/A",
                         Category = j.Category ?? "Chưa phân loại",
                         PostedDate = j.NgayDang,
-                        SalaryRange = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan)
+                        SalaryRange = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan),
+                        Position = j.ViTri ?? string.Empty,
+                        Location = j.Location ?? "Chưa cập nhật",
+                        Quantity = j.SoLuongTuyen?.ToString("N0") ?? "—",
+                        Deadline = j.HanUngTuyen,
+                        Description = j.MoTaCongViec ?? string.Empty,
+                        Requirements = j.YeuCauCongViec ?? string.Empty,
+                        EmployerAddress = j.EmployerAddress ?? string.Empty
                     },
                     pp, PageSize, pq, "approval", "pq", "pp"),
 
@@ -190,17 +201,54 @@ namespace WorkConnect.Controllers
             return View(model);
         }
 
-        // Action xử lý Duyệt tin
+        // Action xử lý Duyệt tin (gọi từ modal "Xem chi tiết")
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveJob(int id, string? returnUrl = null)
         {
             var job = await _context.TinTuyenDungs.FindAsync(id);
-            if (job != null)
+            if (job == null)
             {
-                job.TrangThai = "Đang tuyển";
-                await _context.SaveChangesAsync();
+                TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
+                return RedirectBack(returnUrl);
             }
+
+            // Chỉ xử lý tin còn đang chờ duyệt (tránh duyệt lại khi trang đã cũ / bấm 2 lần)
+            if (job.TrangThai != StatusDraft)
+            {
+                TempData["Error"] = "Tin này đã được xử lý trước đó.";
+                return RedirectBack(returnUrl);
+            }
+
+            job.TrangThai = StatusOpen;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã duyệt tin \"{job.TieuDe}\".";
+            return RedirectBack(returnUrl);
+        }
+
+        // Action xử lý Từ chối tin (gọi từ modal "Xem chi tiết")
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectJob(int id, string? returnUrl = null)
+        {
+            var job = await _context.TinTuyenDungs.FindAsync(id);
+            if (job == null)
+            {
+                TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
+                return RedirectBack(returnUrl);
+            }
+
+            if (job.TrangThai != StatusDraft)
+            {
+                TempData["Error"] = "Tin này đã được xử lý trước đó.";
+                return RedirectBack(returnUrl);
+            }
+
+            job.TrangThai = StatusRejected;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã từ chối tin \"{job.TieuDe}\".";
             return RedirectBack(returnUrl);
         }
 

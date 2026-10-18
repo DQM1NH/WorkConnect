@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkConnect.Models;
 using WorkConnect.Models.Entities;
+using WorkConnect.Services;
+using WorkConnect.ViewModels;
 
 namespace WorkConnect.Controllers
 {
@@ -16,15 +18,18 @@ namespace WorkConnect.Controllers
         private readonly WorkConnectDbContext _context;
         private readonly IPasswordHasher<TaiKhoan> _hasher;
         private readonly ILogger<AccountController> _logger;
+        private readonly IEmailService _emailService;
 
         public AccountController(
             WorkConnectDbContext context,
             IPasswordHasher<TaiKhoan> hasher,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IEmailService emailService)
         {
             _context = context;
             _hasher = hasher;
             _logger = logger;
+            _emailService = emailService;
         }
 
         // ===================== ĐĂNG NHẬP =====================
@@ -149,6 +154,162 @@ namespace WorkConnect.Controllers
             return RedirectToAction(nameof(Login));
         }
 
+        // ===================== QUÊN MẬT KHẨU (FORGOT PASSWORD) =====================
+
+        // GET: /Account/ForgotPassword
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+                return RedirectToAction("Index", "Home");
+
+            return View();
+        }
+
+        // POST: /Account/ForgotPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var email = NormalizeEmail(model.Email);
+            var user = await _context.TaiKhoans.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user != null)
+            {
+                // Tạo mã OTP ngẫu nhiên 6 chữ số
+                string otp = RandomNumberGenerator.GetInt32(100000, 999999).ToString();
+
+                // Lưu OTP và thời gian hết hạn (5 phút) vào Session
+                HttpContext.Session.SetString("OTP_" + email, otp);
+                HttpContext.Session.SetString("OTP_Expiry_" + email, DateTime.UtcNow.AddMinutes(5).ToString("o"));
+
+                // Gửi Mail OTP
+                string mailBody = $@"
+                    <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
+                        <h2 style='color: #0056b3;'>Yêu cầu đặt lại mật khẩu - WorkConnect</h2>
+                        <p>Xin chào <strong>{user.HoTen}</strong>,</p>
+                        <p>Mã OTP để xác minh đặt lại mật khẩu của bạn là:</p>
+                        <h1 style='color: #d9534f; letter-spacing: 4px; text-align: center;'>{otp}</h1>
+                        <p>Mã này có hiệu lực trong <strong>5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+                    </div>";
+
+                try
+                {
+                    await _emailService.SendEmailAsync(email, "Mã OTP đặt lại mật khẩu - WorkConnect", mailBody);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi gửi email OTP đặt lại mật khẩu cho {Email}", email);
+                    ModelState.AddModelError(string.Empty, "Không thể gửi email lúc này. Vui lòng thử lại sau.");
+                    return View(model);
+                }
+            }
+
+            // Chuyển sang bước xác nhận OTP (kể cả không tìm thấy user để tránh dò tìm email)
+            return RedirectToAction(nameof(VerifyOtp), new { email = email });
+        }
+
+        // GET: /Account/VerifyOtp
+        [HttpGet]
+        public IActionResult VerifyOtp(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction(nameof(ForgotPassword));
+
+            return View(new VerifyOtpViewModel { Email = email });
+        }
+
+        // POST: /Account/VerifyOtp
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult VerifyOtp(VerifyOtpViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var email = NormalizeEmail(model.Email);
+            string? savedOtp = HttpContext.Session.GetString("OTP_" + email);
+            string? expiryStr = HttpContext.Session.GetString("OTP_Expiry_" + email);
+
+            if (savedOtp != null && expiryStr != null && DateTime.TryParse(expiryStr, out var expiryTime) && expiryTime > DateTime.UtcNow)
+            {
+                if (savedOtp == model.OtpCode.Trim())
+                {
+                    // Tạo một token xác thực lượt đổi mật khẩu tạm thời
+                    string resetToken = Guid.NewGuid().ToString("N");
+                    HttpContext.Session.SetString("ResetToken_" + email, resetToken);
+
+                    return RedirectToAction(nameof(ResetPassword), new { email = email, token = resetToken });
+                }
+            }
+
+            ModelState.AddModelError(nameof(model.OtpCode), "Mã OTP không chính xác hoặc đã hết hạn.");
+            return View(model);
+        }
+
+        // GET: /Account/ResetPassword
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+                return RedirectToAction(nameof(ForgotPassword));
+
+            string? savedToken = HttpContext.Session.GetString("ResetToken_" + NormalizeEmail(email));
+            if (savedToken == null || savedToken != token)
+            {
+                TempData["ErrorMessage"] = "Phiên làm việc đã hết hạn. Vui lòng thực hiện lại.";
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            return View(new ResetPasswordViewModel { Email = email, Token = token });
+        }
+
+        // POST: /Account/ResetPassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var email = NormalizeEmail(model.Email);
+            string? savedToken = HttpContext.Session.GetString("ResetToken_" + email);
+
+            if (savedToken == null || savedToken != model.Token)
+            {
+                ModelState.AddModelError(string.Empty, "Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
+                return View(model);
+            }
+
+            var user = await _context.TaiKhoans.FirstOrDefaultAsync(u => u.Email == email);
+            if (user != null)
+            {
+                // Cập nhật mật khẩu băm mới
+                user.MatKhauHash = _hasher.HashPassword(user, model.NewPassword);
+                await _context.SaveChangesAsync();
+
+                // Dọn dẹp dữ liệu OTP & Token trong Session
+                HttpContext.Session.Remove("OTP_" + email);
+                HttpContext.Session.Remove("OTP_Expiry_" + email);
+                HttpContext.Session.Remove("ResetToken_" + email);
+
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+            }
+
+            ModelState.AddModelError(string.Empty, "Không tìm thấy tài khoản cần cập nhật.");
+            return View(model);
+        }
+
+        // GET: /Account/ResetPasswordConfirmation
+        [HttpGet]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
         // ===================== ĐĂNG XUẤT / TỪ CHỐI TRUY CẬP =====================
 
         // POST: /Account/Logout
@@ -208,7 +369,7 @@ namespace WorkConnect.Controllers
 
             var props = new AuthenticationProperties
             {
-                IsPersistent = rememberMe,                                   // "Tự động đăng nhập"
+                IsPersistent = rememberMe, // "Tự động đăng nhập"
                 ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : null
             };
 

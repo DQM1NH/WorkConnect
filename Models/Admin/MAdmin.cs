@@ -22,6 +22,15 @@ namespace WorkConnect.Models
         public string Category { get; set; }
         public DateTime PostedDate { get; set; }
         public string SalaryRange { get; set; }
+
+        // Thông tin hiển thị trong modal "Xem chi tiết"
+        public string Position { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public string Quantity { get; set; } = string.Empty;
+        public DateTime Deadline { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string Requirements { get; set; } = string.Empty;
+        public string EmployerAddress { get; set; } = string.Empty;
     }
 
     public class UserAdminViewModel

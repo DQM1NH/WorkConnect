@@ -22,7 +22,7 @@ namespace WorkConnect.Models
         public string PhoneNumber { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải từ 6 ký tự trở lên")]
+        [MinLength(8, ErrorMessage = "Mật khẩu phải từ 8 ký tự trở lên")]
         [MaxLength(100, ErrorMessage = "Mật khẩu tối đa 100 ký tự")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
