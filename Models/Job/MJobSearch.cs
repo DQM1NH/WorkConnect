@@ -89,6 +89,7 @@ namespace WorkConnect.Models
     /// <summary>Thông tin chi tiết tin tuyển dụng (R05).</summary>
     public class JobDetailViewModel
     {
+        public string Slug { get; set; } = string.Empty;
         public int MaTin { get; set; }
         public string TieuDe { get; set; } = string.Empty;
         public string ViTri { get; set; } = string.Empty;

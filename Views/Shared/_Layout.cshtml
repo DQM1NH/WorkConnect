@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - WorkConnect</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WorkConnect.styles.css" asp-append-version="true" />
     @if (ViewData["Description"] is string desc) { <meta name="description" content="@desc" /> }
@@ -20,28 +21,38 @@
 
             <!-- Menu -->
             <nav class="main-nav">
-                <ul>
-                    <li><a asp-controller="Job" asp-action="Index">Tìm Việc Làm</a></li>
-                    <li><a asp-controller="CV" asp-action="Index">CVHay</a></li>
-                    <li><a asp-controller="Salary" asp-action="Index">VietnamSalary</a></li>
-                    <li><a asp-controller="CareerMap" asp-action="Index">CareerMap</a></li>
-                    <li><a asp-controller="Blog" asp-action="Index">Cẩm Nang</a></li>
-                    <li><a asp-controller="Tools" asp-action="Index">Tiện Ích</a></li>
-                </ul>
-            </nav>
+    <ul>
+        <li><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li><a asp-controller="Job" asp-action="Index">Tìm Việc Làm</a></li>
+        <li><a asp-controller="Employer" asp-action="Index">Nhà Tuyển Dụng</a></li>
+        @if (User.IsInRole("Candidate"))
+        {
+            <li><a asp-controller="Candidate" asp-action="Profile">Hồ Sơ</a></li>
+            <li><a asp-controller="Candidate" asp-action="Cv">CV Của Tôi</a></li>
+            <li><a asp-controller="Candidate" asp-action="Applications">Đơn Ứng Tuyển</a></li>
+        }
+    </ul>
+</nav>
 
             <div class="header-actions">
-                <a href="#" class="nav-action-item">
-                    <i class="fa-regular fa-bell"></i> Thông Báo Việc Làm
-                </a>
-                
-                <a asp-controller="Account" asp-action="Login" class="nav-action-item">
-                    <i class="fa-regular fa-user"></i> Đăng nhập
-                </a>
-            </div>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <span class="nav-action-item"><i class="fa-regular fa-user"></i> @User.Identity.Name</span>
+        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-action-item border-0 bg-transparent">Đăng xuất</button>
+        </form>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Login" class="nav-action-item"><i class="fa-regular fa-user"></i> Đăng nhập</a>
+        <a asp-controller="Account" asp-action="Register" class="nav-action-item">Đăng ký</a>
+    }
+</div>
         </div>
     </header>
     <div class="container">
+        @if (TempData["Success"] is string ok) { <div class="alert alert-success mt-3">@ok</div> }
+@if (TempData["Error"] is string er) { <div class="alert alert-danger mt-3">@er</div> }
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

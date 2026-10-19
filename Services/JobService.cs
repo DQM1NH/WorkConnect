@@ -7,7 +7,8 @@ namespace WorkConnect.Services;
 public interface IJobService
 {
     Task<JobFilterOptions> GetFilterOptionsAsync();
-    Task<List<JobListItem>> SearchAsync(JobSearchFilter filter);
+    Task<List<JobListItem>> SearchAsync(JobSearchFilter filter, int? take = null);
+Task<HomeViewModel> GetHomeAsync();
     Task<JobDetailViewModel?> GetDetailAsync(string slug);
 }
 
@@ -38,7 +39,7 @@ public class JobService : IJobService
         return options;
     }
 
-    public async Task<List<JobListItem>> SearchAsync(JobSearchFilter f)
+    public async Task<List<JobListItem>> SearchAsync(JobSearchFilter f, int? take = null)
     {
         f.Normalize();
         var today = DateTime.Today;
@@ -86,6 +87,7 @@ public class JobService : IJobService
                 .ThenByDescending(t => t.NgayDang),
             _ => q.OrderByDescending(t => t.NgayDang)
         };
+        if (take is int n) q = q.Take(n);
 
         // Một truy vấn duy nhất, chỉ lấy các cột cần hiển thị (R25)
         return await q.Select(t => new JobListItem
@@ -117,6 +119,7 @@ public class JobService : IJobService
             .Where(t => t.DuongDanThanThien == slug && t.TrangThai != BanNhap)
             .Select(t => new JobDetailViewModel
             {
+                Slug = t.DuongDanThanThien,
                 MaTin = t.MaTin,
                 TieuDe = t.TieuDe,
                 ViTri = t.ViTri,
@@ -144,4 +147,49 @@ public class JobService : IJobService
             })
             .FirstOrDefaultAsync();
     }
+public async Task<HomeViewModel> GetHomeAsync()
+{
+    var today = DateTime.Today;
+    var open = _db.TinTuyenDungs.AsNoTracking()
+        .Where(t => t.TrangThai == DangTuyen && t.HanUngTuyen >= today);
+
+    // Ngành nghề: đếm theo mã, sau đó ghép tên từ bảng danh mục
+    var nganhNames = await _db.NganhNghes.AsNoTracking()
+        .ToDictionaryAsync(x => x.MaNganhNghe, x => x.TenNganhNghe);
+    var catCounts = await open
+        .GroupBy(t => t.MaNganhNghe)
+        .Select(g => new { Id = g.Key, Count = g.Count() })
+        .ToListAsync();
+    var categories = catCounts
+        .Where(c => nganhNames.ContainsKey(c.Id))
+        .Select(c => new CategoryCount(c.Id, nganhNames[c.Id], c.Count))
+        .OrderByDescending(c => c.Count)
+        .ToList();
+
+    // Nhà tuyển dụng: đếm theo mã, lấy top 8, sau đó ghép tên và logo
+    var empCounts = await open
+        .GroupBy(t => t.MaNhaTuyenDung)
+        .Select(g => new { Id = g.Key, Count = g.Count() })
+        .OrderByDescending(x => x.Count)
+        .Take(8)
+        .ToListAsync();
+    var empIds = empCounts.Select(x => x.Id).ToList();
+    var empMap = await _db.NhaTuyenDungs.AsNoTracking()
+        .Where(e => empIds.Contains(e.MaNhaTuyenDung))
+        .ToDictionaryAsync(e => e.MaNhaTuyenDung);
+    var employers = empCounts
+        .Where(x => empMap.ContainsKey(x.Id))
+        .Select(x => new EmployerCard(x.Id, empMap[x.Id].TenCongTy, empMap[x.Id].DuongDanLogo, x.Count))
+        .ToList();
+
+    return new HomeViewModel
+    {
+        Options = await GetFilterOptionsAsync(),
+        Latest = await SearchAsync(new JobSearchFilter(), 8),
+        TotalJobs = await open.CountAsync(),
+        TotalEmployers = await _db.NhaTuyenDungs.CountAsync(),
+        Categories = categories,
+        Employers = employers
+    };
+}
 }

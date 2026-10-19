@@ -241,3 +241,33 @@ body {
     color: #888;
     line-height: 1.6;
 }
+/* ===== Tăng cỡ chữ toàn site ===== */
+@media (min-width: 768px) {
+  html { font-size: 17px; }
+}
+body { line-height: 1.6; }
+
+/* Header + menu */
+.header-container { max-width: 1320px; height: 74px; }
+.brand-logo { font-size: 30px; }
+.main-nav ul { gap: 30px; }
+.main-nav a { font-size: 17px; }
+.nav-action-item { font-size: 16px; }
+.btn-employer { font-size: 15px; }
+.btn-employer small { font-size: 12px; }
+
+/* Footer */
+.footer-container { max-width: 1320px; }
+.main-footer { font-size: 16px; }
+.footer-logo { font-size: 28px; }
+.footer-tagline { font-size: 12px; }
+.footer-col h4 { font-size: 15px; }
+.footer-col ul li a { font-size: 15px; }
+.btn-app { font-size: 13px; }
+.social-icons a { font-size: 20px; }
+.footer-bottom { font-size: 14px; }
+
+/* Khung nội dung rộng hơn trên màn hình lớn */
+@media (min-width: 1400px) {
+  .container { max-width: 1320px; }
+}
