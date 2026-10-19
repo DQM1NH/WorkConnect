@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // MVC (chỉ đăng ký một lần)
 builder.Services.AddControllersWithViews();
 
+
 // Kết nối CSDL SQL Server (chuỗi kết nối nằm trong appsettings.json hoặc User Secrets)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
