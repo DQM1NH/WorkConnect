@@ -1,0 +1,16 @@
+@model WorkConnect.ViewModels.VerifyOtpViewModel
+@{ ViewData["Title"] = "Xác thực OTP"; }
+
+<div class="container mt-5" style="max-width: 450px;">
+    <h3 class="text-center mb-3">Xác thực OTP</h3>
+    <form asp-action="VerifyOtp" method="post">
+        <input type="hidden" asp-for="Email" />
+        <p class="text-muted text-center">Mã xác minh đã được gửi đến <strong>@Model.Email</strong></p>
+        <div class="mb-3">
+            <input asp-for="OtpCode" class="form-control text-center fs-4" placeholder="------" maxlength="6" />
+            <span asp-validation-for="OtpCode" class="text-danger"></span>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <button type="submit" class="btn btn-success w-100">Xác nhận</button>
+    </form>
+</div>

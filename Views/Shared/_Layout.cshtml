@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - WorkConnect</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WorkConnect.styles.css" asp-append-version="true" />
 </head>
@@ -34,9 +35,31 @@
                     <i class="fa-regular fa-bell"></i> Thông Báo Việc Làm
                 </a>
                 
-                <a asp-controller="Account" asp-action="Login" class="nav-action-item">
-                    <i class="fa-regular fa-user"></i> Đăng nhập
-                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="dropdown">
+                        <a href="#" class="nav-action-item dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-user"></i> @User.Identity.Name
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Trang quản trị</a></li>
+                            }
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="nav-action-item">
+                        <i class="fa-regular fa-user"></i> Đăng nhập
+                    </a>
+                }
             </div>
         </div>
     </header>

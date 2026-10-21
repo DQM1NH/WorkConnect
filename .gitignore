@@ -1,0 +1,67 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# ASP.NET Core static web assets generated files
+**/staticwebassets.build.json
+**/staticwebassets.development.json
+**/staticwebassets.pack.json
+**/staticwebassets.publish.json
+**/staticwebassets.removed.txt
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.obj
+*.tmp
+*.temp
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Publish output
+publish/
+artifacts/
+**/PublishProfiles/
+
+# Logs
+*.log
+logs/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local development settings
+appsettings.Development.json
+secrets.json
+
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
