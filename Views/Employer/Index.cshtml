@@ -1,0 +1,48 @@
+
+@model IEnumerable<WorkConnect.Models.Entities.NhaTuyenDung>
+
+@{
+    ViewData["Title"] = "Danh sách nhà tuyển dụng";
+}
+
+<div class="container mt-4">
+    <h2>Danh sách nhà tuyển dụng</h2>
+    <hr />
+
+    @if (Model == null || !Model.Any())
+    {
+        <p>Chưa có thông tin nhà tuyển dụng.</p>
+    }
+    else
+    {
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Mã nhà tuyển dụng</th>
+                    <th>Tên công ty</th>
+                    <th>Email liên hệ</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var employer in Model)
+                {
+                    <tr>
+                        <td>@employer.MaNhaTuyenDung</td>
+                        <td>
+                            <a asp-controller="Employer"
+                            asp-action="Details"
+                            asp-route-id="@employer.MaNhaTuyenDung">
+                                @employer.TenCongTy
+                            </a>
+                        </td>
+                        <td>@employer.EmailLienHe</td>
+                        <td>@employer.SoDienThoaiLienHe</td>
+                        <td>@employer.DiaChi</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

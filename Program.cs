@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using WorkConnect.Models;
 using WorkConnect.Models.Entities;
 using WorkConnect.Services;
+using WorkConnect.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +67,14 @@ builder.Services
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+    await DemoDataSeeder.SeedAsync(db, scope.ServiceProvider.GetRequiredService<IPasswordHasher<TaiKhoan>>());
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
