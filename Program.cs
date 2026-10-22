@@ -1,29 +1,68 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using WorkConnect.Data;
+using WorkConnect.Models;
 using WorkConnect.Models.Entities;
 using WorkConnect.Services;
+using WorkConnect.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+// Đăng ký Email Service
+builder.Services.AddTransient<IEmailService, EmailService>();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// Cấu hình DbContext
+builder.Services.AddDbContext<WorkConnectDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>();
-builder.Services.AddScoped<IJobService, JobService>();
-builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddControllersWithViews();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(o =>
+// 1. DỊCH VỤ SESSION (Thêm bộ nhớ đệm và cấu hình Session)
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(15); // Thời gian Session hết hạn
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Băm mật khẩu (PBKDF2 + salt ngẫu nhiên)
+builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>();
+
+// Đăng nhập bằng cookie
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        o.LoginPath = "/Account/Login";
-        o.AccessDeniedPath = "/Account/Login";
-        o.Cookie.HttpOnly = true;
-        o.ExpireTimeSpan = TimeSpan.FromHours(8);
-        o.SlidingExpiration = true;
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);   // phiên thường
+        options.SlidingExpiration = true;
+        options.Cookie.Name = "WorkConnect.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+        // Mỗi request kiểm tra lại: tài khoản bị khóa hoặc bị xóa thì hủy phiên đăng nhập ngay
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            var idClaim = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!int.TryParse(idClaim, out var userId))
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<WorkConnectDbContext>();
+            var valid = await db.TaiKhoans.AsNoTracking().AnyAsync(u => u.MaTaiKhoan == userId && !u.BiKhoa);
+            if (!valid)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        };
     });
 
 var app = builder.Build();
@@ -45,7 +84,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthentication();
+// 2. MIDDLEWARE SESSION (Đặt giữa UseRouting và UseAuthentication)
+app.UseSession();
+
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapStaticAssets();

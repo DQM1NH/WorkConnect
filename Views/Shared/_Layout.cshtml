@@ -35,19 +35,36 @@
 </nav>
 
             <div class="header-actions">
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <span class="nav-action-item"><i class="fa-regular fa-user"></i> @User.Identity.Name</span>
-        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-            <button type="submit" class="nav-action-item border-0 bg-transparent">Đăng xuất</button>
-        </form>
-    }
-    else
-    {
-        <a asp-controller="Account" asp-action="Login" class="nav-action-item"><i class="fa-regular fa-user"></i> Đăng nhập</a>
-        <a asp-controller="Account" asp-action="Register" class="nav-action-item">Đăng ký</a>
-    }
-</div>
+                <a href="#" class="nav-action-item">
+                    <i class="fa-regular fa-bell"></i> Thông Báo Việc Làm
+                </a>
+                
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="dropdown">
+                        <a href="#" class="nav-action-item dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-regular fa-user"></i> @User.Identity.Name
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">Trang quản trị</a></li>
+                            }
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="nav-action-item">
+                        <i class="fa-regular fa-user"></i> Đăng nhập
+                    </a>
+                }
+            </div>
         </div>
     </header>
     <div class="container">

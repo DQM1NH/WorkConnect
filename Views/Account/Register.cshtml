@@ -68,6 +68,11 @@
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
 
+                <div class="form-group">
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="* Số điện thoại" inputmode="numeric" maxlength="10" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
                 <div class="form-group password-group">
                     <input asp-for="Password" type="password" id="Password" class="form-control" placeholder="* Mật khẩu" />
                     <i class="fa-regular fa-eye-slash toggle-password" onclick="togglePasswordVisibility('Password', this)"></i>
@@ -98,6 +103,17 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Quy tắc client-side cho [MustBeTrue] (checkbox đồng ý điều khoản)
+        $.validator.addMethod("mustbetrue", function (value, element) {
+            return element.checked;
+        });
+        $.validator.unobtrusive.adapters.addBool("mustbetrue");
+    </script>
+}
 
 <script>
     function togglePasswordVisibility(inputId, iconElement) {
