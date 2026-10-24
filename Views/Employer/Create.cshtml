@@ -1,0 +1,247 @@
+
+@model WorkConnect.Models.Employer.CreateJobViewModel
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Đăng tin tuyển dụng";
+    ViewData["UseEmployerLayout"] = true;
+}
+
+<div class="create-job-page">
+    <div class="create-job-heading">
+        <div>
+            <a asp-controller="Employer"
+               asp-action="Jobs"
+               class="back-link">
+                ← Quay lại danh sách tin
+            </a>
+            <h2>Đăng tin tuyển dụng</h2>
+            <p>Tạo tin tuyển dụng để tiếp cận ứng viên phù hợp.</p>
+        </div>
+    </div>
+
+    <form asp-controller="Employer"
+          asp-action="Create"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <section class="job-form-section">
+            <div class="job-section-heading">
+                <span class="job-section-number">01</span>
+                <div>
+                    <h5>Thông tin cơ bản</h5>
+                    <p>Thông tin chính về vị trí đang tuyển.</p>
+                </div>
+            </div>
+
+            <div class="job-form-grid">
+                <div class="job-field job-field-full">
+                    <label asp-for="TieuDe"></label>
+                    <input asp-for="TieuDe"
+                           class="form-control"
+                           placeholder="Ví dụ: Thực tập sinh Marketing" />
+                    <span asp-validation-for="TieuDe"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="ViTri"></label>
+                    <input asp-for="ViTri"
+                           class="form-control"
+                           placeholder="Ví dụ: Marketing Intern" />
+                    <span asp-validation-for="ViTri"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="MaNganhNghe"></label>
+                    <select asp-for="MaNganhNghe"
+                            asp-items="Model.NganhNghes"
+                            class="form-select">
+                        <option value="">-- Chọn ngành nghề --</option>
+                    </select>
+                    <span asp-validation-for="MaNganhNghe"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="MaLoaiHinh"></label>
+                    <select asp-for="MaLoaiHinh"
+                            asp-items="Model.LoaiHinhs"
+                            class="form-select">
+                        <option value="">-- Chọn loại hình --</option>
+                    </select>
+                    <span asp-validation-for="MaLoaiHinh"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="MaHinhThuc"></label>
+                    <select asp-for="MaHinhThuc"
+                            asp-items="Model.HinhThucs"
+                            class="form-select">
+                        <option value="">-- Chọn hình thức --</option>
+                    </select>
+                    <span asp-validation-for="MaHinhThuc"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="MaDiaDiem"></label>
+                    <select asp-for="MaDiaDiem"
+                            asp-items="Model.DiaDiems"
+                            class="form-select">
+                        <option value="">-- Chọn địa điểm --</option>
+                    </select>
+                    <span asp-validation-for="MaDiaDiem"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="MaMucKinhNghiem"></label>
+                    <select asp-for="MaMucKinhNghiem"
+                            asp-items="Model.MucKinhNghiems"
+                            class="form-select">
+                        <option value="">-- Chọn kinh nghiệm --</option>
+                    </select>
+                    <span asp-validation-for="MaMucKinhNghiem"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="SoLuongTuyen"></label>
+                    <input asp-for="SoLuongTuyen"
+                           type="number"
+                           min="1"
+                           class="form-control" />
+                    <span asp-validation-for="SoLuongTuyen"
+                          class="text-danger"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="job-form-section">
+            <div class="job-section-heading">
+                <span class="job-section-number">02</span>
+                <div>
+                    <h5>Mức lương và thời hạn</h5>
+                    <p>Cho ứng viên biết mức đãi ngộ và hạn ứng tuyển.</p>
+                </div>
+            </div>
+
+            <div class="job-form-grid">
+                <div class="job-field job-field-full">
+                    <div class="salary-agreement">
+                        <input asp-for="LuongThoaThuan"
+                               class="form-check-input" />
+                        <label asp-for="LuongThoaThuan"
+                               class="form-check-label"></label>
+                    </div>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="LuongToiThieu"></label>
+                    <input asp-for="LuongToiThieu"
+                           type="number"
+                           min="0"
+                           class="form-control"
+                           placeholder="Mức lương thấp nhất" />
+                    <span asp-validation-for="LuongToiThieu"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field">
+                    <label asp-for="LuongToiDa"></label>
+                    <input asp-for="LuongToiDa"
+                           type="number"
+                           min="0"
+                           class="form-control"
+                           placeholder="Mức lương cao nhất" />
+                    <span asp-validation-for="LuongToiDa"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="job-field job-field-full">
+                    <label asp-for="HanUngTuyen"></label>
+                    <input asp-for="HanUngTuyen"
+                           type="date"
+                           asp-format="{0:yyyy-MM-dd}"
+                           class="form-control" />
+                    <span asp-validation-for="HanUngTuyen"
+                          class="text-danger"></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="job-form-section">
+            <div class="job-section-heading">
+                <span class="job-section-number">03</span>
+                <div>
+                    <h5>Mô tả công việc</h5>
+                    <p>Cung cấp thông tin cụ thể để ứng viên hiểu vị trí.</p>
+                </div>
+            </div>
+
+            <div class="job-field">
+                <label asp-for="MoTaCongViec"></label>
+                <textarea asp-for="MoTaCongViec"
+                          class="form-control"
+                          rows="5"
+                          placeholder="Mô tả nhiệm vụ và công việc hằng ngày..."></textarea>
+                <span asp-validation-for="MoTaCongViec"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="job-field">
+                <label asp-for="YeuCauCongViec"></label>
+                <textarea asp-for="YeuCauCongViec"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Mô tả kỹ năng và yêu cầu của công việc..."></textarea>
+                <span asp-validation-for="YeuCauCongViec"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="job-field">
+                <label asp-for="YeuCauUngVien"></label>
+                <textarea asp-for="YeuCauUngVien"
+                          class="form-control"
+                          rows="4"
+                          placeholder="Mô tả yêu cầu đối với ứng viên..."></textarea>
+                <span asp-validation-for="YeuCauUngVien"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="job-field">
+                <label asp-for="QuyenLoi"></label>
+                <textarea asp-for="QuyenLoi"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Lương thưởng, phúc lợi và cơ hội phát triển..."></textarea>
+                <span asp-validation-for="QuyenLoi"
+                      class="text-danger"></span>
+            </div>
+        </section>
+
+        <div class="job-form-actions">
+            <a asp-controller="Employer"
+               asp-action="Jobs"
+               class="btn btn-outline-secondary">
+                Hủy
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Lưu tin
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -2,43 +2,507 @@
 @model IEnumerable<WorkConnect.Models.Entities.TinTuyenDung>
 
 @{
-    ViewData["Title"] = "Danh sách tin tuyển dụng";
+    Layout = "_Layout";
+    ViewData["Title"] = "Tin tuyển dụng";
+    ViewData["UseEmployerLayout"] = true;
+    var jobs = Model?.ToList()
+        ?? new List<WorkConnect.Models.Entities.TinTuyenDung>();
+
+    var totalJobs = jobs.Count;
+
+    var recruitingJobs = jobs.Count(j =>
+        (j.TrangThai ?? "").Contains("đang tuyển",
+            StringComparison.OrdinalIgnoreCase));
+
+    var pendingJobs = jobs.Count(j =>
+        (j.TrangThai ?? "").Contains("chờ duyệt",
+            StringComparison.OrdinalIgnoreCase));
+
+    var expiredJobs = jobs.Count(j =>
+        (j.TrangThai ?? "").Contains("hết hạn",
+            StringComparison.OrdinalIgnoreCase));
 }
 
-<div class="container mt-4">
-    <h2>Danh sách tin tuyển dụng</h2>
-    <hr />
+<style>
+    .jobs-page {
+        color: #252b36;
+    }
 
-    @if (Model == null || !Model.Any())
-    {
-        <p>Chưa có tin tuyển dụng.</p>
+    .jobs-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 20px;
     }
-    else
-    {
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Mã tin</th>
-                    <th>Tiêu đề</th>
-                    <th>Vị trí</th>
-                    <th>Ngày đăng</th>
-                    <th>Hạn ứng tuyển</th>
-                    <th>Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var job in Model)
-                {
-                    <tr>
-                        <td>@job.MaTin</td>
-                        <td>@job.TieuDe</td>
-                        <td>@job.ViTri</td>
-                        <td>@job.NgayDang.ToString("dd/MM/yyyy")</td>
-                        <td>@job.HanUngTuyen.ToString("dd/MM/yyyy")</td>
-                        <td>@job.TrangThai</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+
+    .jobs-heading h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 6px;
     }
+
+    .jobs-subtitle {
+        color: #7b8494;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .jobs-primary-btn {
+        background: #245194;
+        color: white;
+        border: 1px solid #245194;
+        border-radius: 5px;
+        padding: 8px 14px;
+        font-size: 12px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .jobs-primary-btn:hover {
+        background: #193e75;
+        color: white;
+    }
+
+    .jobs-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .jobs-stat-card {
+        background: #fff;
+        border: 1px solid #dfe4ec;
+        border-radius: 7px;
+        padding: 14px;
+    }
+
+    .jobs-stat-label {
+        color: #7b8494;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .jobs-stat-number {
+        font-size: 23px;
+        line-height: 1.2;
+        font-weight: 700;
+    }
+
+    .jobs-list-card {
+        background: white;
+        border: 1px solid #dfe4ec;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+    .jobs-list-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 12px;
+    }
+
+    .jobs-list-content {
+        padding: 14px 12px 10px;
+    }
+
+    .jobs-filter-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .jobs-filter-row .form-control,
+    .jobs-filter-row .form-select {
+        font-size: 11px;
+        min-height: 34px;
+        border-color: #dfe4ec;
+    }
+
+    .jobs-search {
+        flex: 1 1 220px;
+    }
+
+    .jobs-filter-row .form-select {
+        flex: 0 1 150px;
+    }
+
+    .jobs-filter-btn {
+        min-height: 34px;
+        padding: 5px 12px;
+        font-size: 11px;
+        border-radius: 5px;
+    }
+
+    .jobs-table {
+        font-size: 11px;
+        margin-bottom: 0;
+        border-color: #e3e7ee;
+    }
+
+    .jobs-table thead th {
+        background: #fff;
+        color: #687386;
+        font-weight: 500;
+        font-size: 10px;
+        padding: 10px 8px;
+        white-space: nowrap;
+        border-bottom: 1px solid #dfe4ec;
+    }
+
+    .jobs-table tbody td {
+        padding: 12px 8px;
+        border-color: #e3e7ee;
+        vertical-align: middle;
+    }
+
+    .jobs-table tbody tr:hover {
+        background: #f8faff;
+    }
+
+    .jobs-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .jobs-position {
+        color: #7b8494;
+        font-size: 10px;
+    }
+
+    .jobs-status {
+        display: inline-block;
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 10px;
+        white-space: nowrap;
+        background: #f0f1f3;
+        color: #525967;
+    }
+
+    .jobs-status[data-status*="đang tuyển"] {
+        background: #e4f3e8;
+        color: #267342;
+    }
+
+    .jobs-status[data-status*="chờ duyệt"] {
+        background: #fff2d7;
+        color: #8a6414;
+    }
+
+    .jobs-status[data-status*="hết hạn"] {
+        background: #eeeeef;
+        color: #626873;
+    }
+
+    .jobs-status[data-status*="bản nháp"] {
+        background: #eaf0f8;
+        color: #456181;
+    }
+
+    .jobs-action {
+        display: inline-block;
+        padding: 3px 5px;
+        border: 0;
+        background: transparent;
+        font-size: 10px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .jobs-action-edit,
+    .jobs-action-details {
+        color: #245194;
+    }
+
+    .jobs-action-delete {
+        color: #555d69;
+    }
+
+    .jobs-action:hover {
+        text-decoration: underline;
+    }
+
+    .jobs-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 10px 0;
+        color: #7b8494;
+        font-size: 10px;
+    }
+
+    .jobs-empty {
+        text-align: center;
+        padding: 35px 12px;
+        color: #7b8494;
+    }
+
+    @@media (max-width: 850px) {
+        .jobs-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 520px) {
+        .jobs-heading {
+            flex-direction: column;
+        }
+
+        .jobs-stats {
+            gap: 8px;
+        }
+
+        .jobs-stat-card {
+            padding: 10px;
+        }
+    }
+</style>
+
+<div class="jobs-page">
+
+    <div class="jobs-heading">
+        <div>
+            <h1>Tin tuyển dụng</h1>
+            <p class="jobs-subtitle">
+                Quản lý các vị trí đang tuyển và tin đã đăng.
+            </p>
+        </div>
+
+        <a asp-controller="Employer"
+           asp-action="Create"
+           class="jobs-primary-btn">
+            + Đăng tin mới
+        </a>
+    </div>
+
+    <div class="jobs-stats">
+        <div class="jobs-stat-card">
+            <div class="jobs-stat-label">Tổng tin</div>
+            <div class="jobs-stat-number">@totalJobs</div>
+        </div>
+
+        <div class="jobs-stat-card">
+            <div class="jobs-stat-label">Đang tuyển</div>
+            <div class="jobs-stat-number">@recruitingJobs</div>
+        </div>
+
+        <div class="jobs-stat-card">
+            <div class="jobs-stat-label">Chờ duyệt</div>
+            <div class="jobs-stat-number">@pendingJobs</div>
+        </div>
+
+        <div class="jobs-stat-card">
+            <div class="jobs-stat-label">Hết hạn</div>
+            <div class="jobs-stat-number">@expiredJobs</div>
+        </div>
+    </div>
+
+    <div class="jobs-list-card">
+        <div class="jobs-list-content">
+
+            <h2 class="jobs-list-title">Danh sách tin</h2>
+
+            <div class="jobs-filter-row">
+                <input type="text"
+                       id="jobSearch"
+                       class="form-control jobs-search"
+                       placeholder="⌕  Tìm theo chức danh..."
+                       aria-label="Tìm kiếm tin tuyển dụng" />
+
+                <select id="jobStatusFilter"
+                        class="form-select"
+                        aria-label="Lọc theo trạng thái">
+                    <option value="">Tất cả trạng thái</option>
+                    @foreach (var status in jobs
+                        .Select(j => j.TrangThai)
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Distinct())
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+
+                <button type="button"
+                        id="jobFilterButton"
+                        class="btn btn-outline-secondary jobs-filter-btn">
+                    Lọc
+                </button>
+
+                <button type="button"
+                        id="jobResetButton"
+                        class="btn btn-outline-secondary jobs-filter-btn">
+                    Đặt lại
+                </button>
+            </div>
+
+            @if (jobs.Count == 0)
+            {
+                <div class="jobs-empty">
+                    <h5>Chưa có tin tuyển dụng</h5>
+                    <p>Hãy đăng tin đầu tiên để tìm kiếm ứng viên.</p>
+
+                    <a asp-controller="Employer"
+                       asp-action="Create"
+                       class="jobs-primary-btn">
+                        Đăng tin mới
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table jobs-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>MÃ TIN</th>
+                                <th>VỊ TRÍ</th>
+                                <th>NGÀY ĐĂNG</th>
+                                <th>HẠN ỨNG TUYỂN</th>
+                                <th>TRẠNG THÁI</th>
+                                <th class="text-center">THAO TÁC</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="jobTableBody">
+                            @foreach (var job in jobs)
+                            {
+                                <tr data-job-row
+                                    data-status="@job.TrangThai">
+                                    <td>#@job.MaTin</td>
+
+                                    <td>
+                                        <div class="jobs-title">
+                                            @job.TieuDe
+                                        </div>
+                                        <div class="jobs-position">
+                                            @job.ViTri
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        @job.NgayDang.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        @job.HanUngTuyen.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        <span class="jobs-status"
+                                              data-status="@job.TrangThai">
+                                            @job.TrangThai
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center align-items-center gap-1">
+                                            <a asp-controller="Employer"
+                                               asp-action="Edit"
+                                               asp-route-id="@job.MaTin"
+                                               class="jobs-action jobs-action-edit">
+                                                ✎ Sửa
+                                            </a>
+
+                                            <a asp-controller="Employer"
+                                               asp-action="Delete"
+                                               asp-route-id="@job.MaTin"
+                                               class="jobs-action jobs-action-delete">
+                                                ⊗ Xóa
+                                            </a>
+
+                                            <a asp-controller="Employer"
+                                               asp-action="JobDetails"
+                                               asp-route-id="@job.MaTin"
+                                               class="jobs-action jobs-action-details">
+                                                Xem
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="noSearchResult"
+                     class="jobs-empty"
+                     style="display:none;">
+                    Không tìm thấy tin tuyển dụng phù hợp.
+                </div>
+
+                <div class="jobs-footer">
+                    <span id="jobsResultCount">
+                        Hiển thị @jobs.Count tin tuyển dụng
+                    </span>
+                    <span>WorkConnect</span>
+                </div>
+            }
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById("jobSearch");
+        const statusFilter = document.getElementById("jobStatusFilter");
+        const filterButton = document.getElementById("jobFilterButton");
+        const resetButton = document.getElementById("jobResetButton");
+        const rows = Array.from(document.querySelectorAll("[data-job-row]"));
+        const noResult = document.getElementById("noSearchResult");
+        const resultCount = document.getElementById("jobsResultCount");
+
+        function filterJobs() {
+            const keyword = (searchInput?.value || "")
+                .trim()
+                .toLocaleLowerCase("vi");
+
+            const selectedStatus = (statusFilter?.value || "")
+                .toLocaleLowerCase("vi");
+
+            let visibleCount = 0;
+
+            rows.forEach(function (row) {
+                const rowText = row.textContent.toLocaleLowerCase("vi");
+                const rowStatus = (row.dataset.status || "")
+                    .toLocaleLowerCase("vi");
+
+                const matchesKeyword = rowText.includes(keyword);
+                const matchesStatus = !selectedStatus ||
+                    rowStatus === selectedStatus;
+
+                const visible = matchesKeyword && matchesStatus;
+                row.style.display = visible ? "" : "none";
+
+                if (visible) {
+                    visibleCount++;
+                }
+            });
+
+            if (noResult) {
+                noResult.style.display =
+                    visibleCount === 0 ? "block" : "none";
+            }
+
+            if (resultCount) {
+                resultCount.textContent =
+                    "Hiển thị " + visibleCount + " / " +
+                    rows.length + " tin tuyển dụng";
+            }
+        }
+
+        searchInput?.addEventListener("input", filterJobs);
+        filterButton?.addEventListener("click", filterJobs);
+        statusFilter?.addEventListener("change", filterJobs);
+
+        resetButton?.addEventListener("click", function () {
+            if (searchInput) searchInput.value = "";
+            if (statusFilter) statusFilter.value = "";
+            filterJobs();
+        });
+    </script>
+}

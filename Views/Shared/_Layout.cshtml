@@ -29,22 +29,118 @@
                 </ul>
             </nav>
 
-            <div class="header-actions">
-                <a href="#" class="nav-action-item">
-                    <i class="fa-regular fa-bell"></i> Thông Báo Việc Làm
-                </a>
-                
-                <a asp-controller="Account" asp-action="Login" class="nav-action-item">
+            
+        <div class="header-actions">
+            <a href="#" class="nav-action-item">
+                <i class="fa-regular fa-bell"></i> Thông Báo Việc Làm
+            </a>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <span class="nav-action-item">
+                    <i class="fa-regular fa-user"></i>
+                    Xin chào, @User.Identity.Name
+                </span>
+
+                <form asp-controller="Account"
+                    asp-action="Logout"
+                    method="post"
+                    style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="nav-action-item"
+                            style="background: none; border: none; cursor: pointer;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Đăng xuất
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login"
+                class="nav-action-item">
                     <i class="fa-regular fa-user"></i> Đăng nhập
                 </a>
-            </div>
+
+                <a asp-controller="Account" asp-action="Register"
+                class="nav-action-item">
+                    Đăng ký
+                </a>
+            }
+        </div>
+
         </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    @if (ViewData["UseEmployerLayout"] as bool? == true)
+    {
+        <div class="employer-shell">
+            <aside class="employer-sidebar">
+                <div class="employer-menu-title">
+                    MENU NHÀ TUYỂN DỤNG
+                </div>
+
+                
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    var isJobsPage = currentController == "Employer"
+        && new[] { "Jobs", "Create", "Edit", "JobDetails", "Details", "Delete" }
+            .Contains(currentAction);
+}
+
+        <nav class="employer-menu">
+            <a asp-controller="Employer"
+            asp-action="Index"
+            class="@(currentController == "Employer" && currentAction == "Index" ? "active" : "")">
+                ▦ &nbsp; Tổng quan
+            </a>
+
+            <a asp-controller="Employer"
+            asp-action="Jobs"
+            class="@(isJobsPage ? "active" : "")">
+                ▤ &nbsp; Tin tuyển dụng
+            </a>
+
+            <a asp-controller="Employer"
+            asp-action="Jobs"
+            class="@(currentController == "Employer" && currentAction == "Candidates" ? "active" : "")">
+                ♙ &nbsp; Ứng viên
+            </a>
+
+            <a asp-controller="Employer"
+            asp-action="Index"
+            class="@(currentController == "Employer" && currentAction == "CompanyProfile" ? "active" : "")">
+                ▧ &nbsp; Hồ sơ công ty
+            </a>
+
+            <a asp-controller="Employer"
+            asp-action="Index"
+            class="@(currentController == "Employer" && currentAction == "Settings" ? "active" : "")">
+                ⚙ &nbsp; Cài đặt
+            </a>
+        </nav>
+
+
+                <div class="employer-sidebar-bottom">
+                    Tài khoản nhà tuyển dụng
+                </div>
+            </aside>
+
+            <main class="employer-main">
+                <div class="employer-content">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    }
+    else
+    {
+        <div class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    }
 
     <!-- Footer -->
     <footer class="main-footer">

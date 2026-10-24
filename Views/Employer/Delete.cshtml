@@ -1,0 +1,330 @@
+@model WorkConnect.Models.Entities.TinTuyenDung
+
+@{
+    ViewData["Title"] = "Xóa tin tuyển dụng";
+    Layout = "_Layout";
+    ViewData["UseEmployerLayout"] = true;
+}
+
+<style>
+    .delete-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        color: #202938;
+        font-family: Arial, sans-serif;
+    }
+
+    .delete-breadcrumb {
+        color: #7b8494;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
+
+    .delete-heading {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .delete-subtitle {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+
+    .delete-warning {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 18px 20px;
+        margin-bottom: 22px;
+        background: #fff4e5;
+        border: 1px solid #ffd59a;
+        border-radius: 10px;
+    }
+
+    .delete-warning-icon {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffe4bd;
+        color: #a96800;
+        border-radius: 50%;
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .delete-warning strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #8a5100;
+        font-size: 15px;
+    }
+
+    .delete-warning p {
+        margin: 0;
+        color: #76531e;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .delete-card {
+        background: #fff;
+        border: 1px solid #e2e6ec;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .delete-card-header {
+        padding: 20px 24px;
+        background: #f8faff;
+        border-bottom: 1px solid #e2e6ec;
+    }
+
+    .delete-card-header h3 {
+        font-size: 17px;
+        margin: 0 0 7px;
+        font-weight: 700;
+    }
+
+    .delete-card-header p {
+        margin: 0;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .delete-card-body {
+        padding: 24px;
+    }
+
+    .delete-job-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2457a7;
+        margin-bottom: 8px;
+        overflow-wrap: anywhere;
+    }
+
+    .delete-job-position {
+        color: #525d6d;
+        margin-bottom: 22px;
+        font-size: 14px;
+    }
+
+    .delete-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .delete-info-item {
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 1px solid #edf0f5;
+        border-radius: 7px;
+        min-width: 0;
+    }
+
+    .delete-info-label {
+        display: block;
+        color: #7b8494;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+
+    .delete-info-value {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .delete-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #eaf1fc;
+        color: #2457a7;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .delete-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding-top: 20px;
+        border-top: 1px solid #e2e6ec;
+    }
+
+    .delete-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 42px;
+        padding: 0 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .delete-btn-cancel {
+        background: #fff;
+        border: 1px solid #d7dce5;
+        color: #454d5b;
+    }
+
+    .delete-btn-cancel:hover {
+        background: #f5f7fa;
+        color: #202938;
+    }
+
+    .delete-btn-confirm {
+        background: #d92d20;
+        border: 1px solid #d92d20;
+        color: #fff;
+    }
+
+    .delete-btn-confirm:hover {
+        background: #b42318;
+        border-color: #b42318;
+    }
+
+    @@media (max-width: 650px) {
+        .delete-page {
+            padding: 0 4px;
+        }
+
+        .delete-heading {
+            font-size: 22px;
+        }
+
+        .delete-card-body {
+            padding: 16px;
+        }
+
+        .delete-info-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .delete-actions {
+            flex-direction: column-reverse;
+        }
+
+        .delete-btn {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    }
+</style>
+
+<div class="delete-page">
+
+    <div class="delete-breadcrumb">
+        Nhà tuyển dụng / Tin tuyển dụng / Xóa tin
+    </div>
+
+    <h1 class="delete-heading">Xóa tin tuyển dụng</h1>
+
+    <p class="delete-subtitle">
+        Kiểm tra thông tin trước khi xác nhận xóa tin tuyển dụng.
+    </p>
+
+    <div class="delete-warning">
+        <div class="delete-warning-icon">!</div>
+        <div>
+            <strong>Bạn đang chuẩn bị xóa một tin tuyển dụng</strong>
+            <p>
+                Vui lòng kiểm tra lại thông tin bên dưới. Thao tác này có thể
+                khiến tin tuyển dụng không còn xuất hiện trong danh sách quản lý.
+                Chỉ nhấn “Xác nhận xóa” nếu bạn chắc chắn muốn tiếp tục.
+            </p>
+        </div>
+    </div>
+
+    <div class="delete-card">
+        <div class="delete-card-header">
+            <h3>Thông tin tin tuyển dụng</h3>
+            <p>Mã tin: #@Model.MaTin</p>
+        </div>
+
+        <div class="delete-card-body">
+            <div class="delete-job-title">
+                @Model.TieuDe
+            </div>
+
+            <div class="delete-job-position">
+                Vị trí tuyển dụng: @(string.IsNullOrWhiteSpace(Model.ViTri)
+                    ? "Chưa cập nhật"
+                    : Model.ViTri)
+            </div>
+
+            <div class="delete-info-grid">
+                <div class="delete-info-item">
+                    <span class="delete-info-label">Mã tin tuyển dụng</span>
+                    <span class="delete-info-value">#@Model.MaTin</span>
+                </div>
+
+                <div class="delete-info-item">
+                    <span class="delete-info-label">Trạng thái</span>
+                    <span class="delete-info-value">
+                        <span class="delete-status">
+                            @(string.IsNullOrWhiteSpace(Model.TrangThai)
+                                ? "Chưa cập nhật"
+                                : Model.TrangThai)
+                        </span>
+                    </span>
+                </div>
+
+                <div class="delete-info-item">
+                    <span class="delete-info-label">Ngày đăng</span>
+                    <span class="delete-info-value">
+                        @(Model.NgayDang == default
+                            ? "Chưa cập nhật"
+                            : Model.NgayDang.ToString("dd/MM/yyyy"))
+                    </span>
+                </div>
+
+                <div class="delete-info-item">
+                    <span class="delete-info-label">Hạn ứng tuyển</span>
+                    <span class="delete-info-value">
+                        @(Model.HanUngTuyen == default
+                            ? "Chưa cập nhật"
+                            : Model.HanUngTuyen.ToString("dd/MM/yyyy"))
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-controller="Employer"
+          asp-action="Delete"
+          asp-route-id="@Model.MaTin"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="id" value="@Model.MaTin" />
+
+        <div class="delete-actions">
+            <a asp-controller="Employer"
+               asp-action="Jobs"
+               class="delete-btn delete-btn-cancel">
+                Hủy, quay lại danh sách
+            </a>
+
+            <button type="submit" class="delete-btn delete-btn-confirm">
+                Xác nhận xóa tin
+            </button>
+        </div>
+    </form>
+
+</div>

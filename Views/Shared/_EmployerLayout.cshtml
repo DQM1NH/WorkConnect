@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WorkConnect</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WorkConnect.styles.css" asp-append-version="true" />
+
+    <style>
+        body {
+            margin: 0;
+            background: #f5f6f8;
+            color: #252b36;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+        }
+
+        /* Thanh đầu trang */
+        .employer-header {
+            min-height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #e2e6ec;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 4%;
+        }
+
+        .employer-header-left {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+            flex-wrap: wrap;
+        }
+
+        .employer-logo {
+            color: #245194;
+            font-size: 22px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .employer-logo span {
+            color: #245194;
+        }
+
+        .employer-top-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .employer-top-nav a {
+            color: #454d5b;
+            font-size: 12px;
+            text-decoration: none;
+        }
+
+        .employer-top-nav a:hover {
+            color: #245194;
+        }
+
+        .employer-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #697386;
+        }
+
+        .employer-header-right form {
+            margin: 0;
+        }
+
+        /* Sidebar và nội dung */
+        .employer-shell {
+            display: flex;
+            align-items: stretch;
+            min-height: 580px;
+        }
+
+        .employer-sidebar {
+            width: 205px;
+            flex: 0 0 205px;
+            background: #fff;
+            border-right: 1px solid #e2e6ec;
+            padding: 24px 12px;
+        }
+
+        .employer-menu-title {
+            color: #7b8494;
+            font-size: 10px;
+            margin: 0 10px 14px;
+        }
+
+        .employer-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .employer-menu a {
+            color: #454d5b;
+            text-decoration: none;
+            padding: 12px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .employer-menu a:hover,
+        .employer-menu a.active {
+            background: #e8effa;
+            color: #245194;
+        }
+
+        .employer-sidebar-bottom {
+            margin: 50px 10px 0;
+            color: #7b8494;
+            font-size: 10px;
+        }
+
+        .employer-main {
+            flex: 1;
+            min-width: 0;
+            padding: 26px;
+        }
+
+        .employer-content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Footer WorkConnect */
+        .employer-footer {
+            background: #fff;
+            border-top: 1px solid #e2e6ec;
+            padding: 32px 5% 18px;
+            color: #626c7c;
+        }
+
+        .employer-footer-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .employer-footer-top {
+            display: grid;
+            grid-template-columns: 1.2fr 2fr;
+            gap: 32px;
+        }
+
+        .employer-footer-logo {
+            color: #245194;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .employer-footer-tagline {
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .employer-footer-links {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .employer-footer-col h4 {
+            color: #303947;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .employer-footer-col ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .employer-footer-col li {
+            margin-bottom: 9px;
+        }
+
+        .employer-footer-col a {
+            color: #626c7c;
+            font-size: 11px;
+            text-decoration: none;
+        }
+
+        .employer-footer-col a:hover {
+            color: #245194;
+        }
+
+        .employer-footer-bottom {
+            border-top: 1px solid #e2e6ec;
+            margin-top: 24px;
+            padding-top: 15px;
+            font-size: 10px;
+        }
+
+        .employer-footer-bottom p {
+            margin-bottom: 5px;
+        }
+
+        @@media (max-width: 900px) {
+            .employer-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .employer-header-left {
+                gap: 15px;
+            }
+
+            .employer-footer-top {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 600px) {
+            .employer-sidebar {
+                width: 135px;
+                flex-basis: 135px;
+                padding: 16px 6px;
+            }
+
+            .employer-main {
+                padding: 14px 10px;
+            }
+
+            .employer-top-nav {
+                gap: 10px;
+            }
+
+            .employer-footer-links {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Thanh trên cùng: giữ menu WorkConnect -->
+    <header class="employer-header">
+        <div class="employer-header-left">
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="employer-logo">
+                Work<span>Connect</span>
+            </a>
+
+            <nav class="employer-top-nav">
+                <a asp-controller="Job" asp-action="Index">Tìm Việc Làm</a>
+                <a asp-controller="CV" asp-action="Index">CVHay</a>
+                <a asp-controller="Salary" asp-action="Index">VietnamSalary</a>
+                <a asp-controller="CareerMap" asp-action="Index">CareerMap</a>
+                <a asp-controller="Blog" asp-action="Index">Cẩm Nang</a>
+                <a asp-controller="Tools" asp-action="Index">Tiện Ích</a>
+            </nav>
+        </div>
+
+        <div class="employer-header-right">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span>Xin chào, @User.Identity.Name</span>
+
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-secondary">
+                        Đăng xuất
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="btn btn-sm btn-outline-primary">
+                    Đăng nhập
+                </a>
+            }
+        </div>
+    </header>
+
+    <!-- Nội dung khu vực nhà tuyển dụng -->
+    <div class="employer-shell">
+        <aside class="employer-sidebar">
+            <div class="employer-menu-title">
+                MENU NHÀ TUYỂN DỤNG
+            </div>
+
+            <nav class="employer-menu">
+                <a asp-controller="Employer" asp-action="Index">
+                    ▦ &nbsp; Tổng quan
+                </a>
+
+                <a asp-controller="Employer"
+                   asp-action="Jobs"
+                   class="active">
+                    ▤ &nbsp; Tin tuyển dụng
+                </a>
+
+                <a asp-controller="Employer" asp-action="Jobs">
+                    ♙ &nbsp; Ứng viên
+                </a>
+
+                <a asp-controller="Employer" asp-action="Index">
+                    ▧ &nbsp; Hồ sơ công ty
+                </a>
+
+                <a asp-controller="Employer" asp-action="Index">
+                    ⚙ &nbsp; Cài đặt
+                </a>
+            </nav>
+
+            <div class="employer-sidebar-bottom">
+                Tài khoản nhà tuyển dụng
+            </div>
+        </aside>
+
+        <main class="employer-main">
+            <div class="employer-content">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer WorkConnect ở cuối trang -->
+    <footer class="employer-footer">
+        <div class="employer-footer-inner">
+            <div class="employer-footer-top">
+                <div>
+                    <div class="employer-footer-logo">
+                        Work<span>Connect</span>
+                    </div>
+                    <p class="employer-footer-tagline">
+                        LEADING THE HUMAN RESOURCES INDUSTRY
+                    </p>
+                </div>
+
+                <div class="employer-footer-links">
+                    <div class="employer-footer-col">
+                        <h4>DÀNH CHO ỨNG VIÊN</h4>
+                        <ul>
+                            <li><a href="#">Việc làm mới nhất</a></li>
+                            <li><a href="#">CVHay</a></li>
+                            <li><a href="#">VietnamSalary</a></li>
+                            <li><a href="#">Cẩm Nang</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="employer-footer-col">
+                        <h4>NHÀ TUYỂN DỤNG</h4>
+                        <ul>
+                            <li>
+                                <a asp-controller="Employer"
+                                   asp-action="Create">Đăng tuyển dụng</a>
+                            </li>
+                            <li><a href="#">Tìm hồ sơ</a></li>
+                            <li><a href="#">Sản phẩm dịch vụ</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="employer-footer-col">
+                        <h4>TRUNG TÂM TRỢ GIÚP</h4>
+                        <ul>
+                            <li><a href="#">Về WorkConnect</a></li>
+                            <li><a href="#">Chính sách bảo mật</a></li>
+                            <li><a href="#">Điều khoản sử dụng</a></li>
+                            <li><a href="#">Trợ giúp</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="employer-footer-bottom">
+                <p>Trụ sở: Tòa nhà WorkConnect, TP. Hà Nội, Việt Nam</p>
+                <p>Email: contact@workconnect.vn | Copyright © WorkConnect Corporation</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

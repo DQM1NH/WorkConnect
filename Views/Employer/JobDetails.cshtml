@@ -1,0 +1,406 @@
+@model WorkConnect.Models.Entities.TinTuyenDung
+
+@{
+    ViewData["Title"] = "Chi tiết tin tuyển dụng";
+    Layout = "_Layout";
+    ViewData["UseEmployerLayout"] = true;
+
+    var tenCongTy = ViewBag.TenCongTy as string ?? "Công ty tuyển dụng";
+    var maTin = Model?.MaTin ?? 0;
+    var trangThai = Model?.TrangThai ?? "Bản nháp";
+    var moTa = ViewBag.MoTa as string ?? "Chưa có mô tả công việc.";
+    var yeuCau = ViewBag.YeuCau as string ?? "Chưa có thông tin yêu cầu ứng viên.";
+    var quyenLoi = ViewBag.QuyenLoi as string ?? "Chưa có thông tin quyền lợi.";
+    var thongTinBoSung = ViewBag.ThongTinBoSung as string
+        ?? "Vui lòng xem nội dung tin tuyển dụng để biết thêm chi tiết.";
+
+    var soLuong = ViewBag.SoLuong ?? 0;
+    var nganhNghe = ViewBag.NganhNghe as string ?? "Chưa cập nhật";
+    var diaDiem = ViewBag.DiaDiem as string ?? "Chưa cập nhật";
+    var mucLuong = ViewBag.MucLuong as string ?? "Thỏa thuận";
+    var kinhNghiem = ViewBag.KinhNghiem as string ?? "Không yêu cầu";
+    var hinhThuc = ViewBag.HinhThuc as string ?? "Toàn thời gian";
+    var soHoSo = ViewBag.SoHoSo ?? 0;
+}
+
+<style>
+    .job-detail-page {
+        background: #f3f6fb;
+        min-height: 600px;
+        padding: 22px 20px 34px;
+        color: #202b40;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    .job-detail-page * {
+        box-sizing: border-box;
+    }
+
+    .job-detail-page .breadcrumb {
+        font-size: 11px;
+        color: #7d8799;
+        margin-bottom: 10px;
+    }
+
+    .job-detail-page .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .job-detail-page h1 {
+        font-size: 23px;
+        font-weight: 700;
+        margin: 0 0 6px;
+        color: #202b40;
+    }
+
+    .job-detail-page .subtitle {
+        font-size: 11px;
+        color: #7d8799;
+        margin: 0;
+    }
+
+    .job-detail-page .heading-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .job-detail-page .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 16px;
+        background: #fff;
+        border: 1px solid #dfe5ef;
+        border-radius: 6px;
+        color: #174b9b;
+        text-decoration: none;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .job-detail-page .action-btn:hover {
+        background: #edf4ff;
+    }
+
+    .job-detail-page .delete-btn {
+        color: #e54848;
+        border-color: #ff7777;
+    }
+
+    .job-detail-page .delete-btn:hover {
+        background: #fff1f1;
+    }
+
+    .job-detail-page .detail-card {
+        background: #fff;
+        border: 1px solid #e3e9f2;
+        border-radius: 8px;
+        padding: 18px;
+        margin-bottom: 12px;
+    }
+
+    .job-detail-page .job-summary-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 17px;
+    }
+
+    .job-detail-page .job-summary-title h2 {
+        font-size: 19px;
+        font-weight: 700;
+        margin: 0 0 5px;
+    }
+
+    .job-detail-page .company-name {
+        font-size: 11px;
+        color: #7d8799;
+    }
+
+    .job-detail-page .status {
+        display: inline-block;
+        min-width: 102px;
+        text-align: center;
+        padding: 7px 12px;
+        border-radius: 20px;
+        background: #e4f5ee;
+        color: #14845f;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .job-detail-page .status-draft {
+        background: #fff2d8;
+        color: #a76a00;
+    }
+
+    .job-detail-page .status-closed {
+        background: #fce8e8;
+        color: #c43d3d;
+    }
+
+    .job-detail-page .job-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 17px 26px;
+    }
+
+    .job-detail-page .info-item {
+        display: grid;
+        grid-template-columns: 90px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+        font-size: 11px;
+    }
+
+    .job-detail-page .info-label {
+        color: #7d8799;
+    }
+
+    .job-detail-page .info-value {
+        color: #263247;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .job-detail-page .section-card {
+        min-height: 92px;
+        display: flex;
+        gap: 17px;
+        align-items: flex-start;
+        padding: 18px;
+    }
+
+    .job-detail-page .section-number {
+        color: #00b89c;
+        font-size: 15px;
+        font-weight: 700;
+        min-width: 14px;
+    }
+
+    .job-detail-page .section-content {
+        min-width: 0;
+    }
+
+    .job-detail-page .section-content h3 {
+        color: #1552a4;
+        font-size: 12px;
+        font-weight: 700;
+        margin: 1px 0 10px;
+    }
+
+    .job-detail-page .section-content p {
+        color: #778196;
+        font-size: 11px;
+        line-height: 1.8;
+        margin: 0;
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+    }
+
+    .job-detail-page .application-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .job-detail-page .application-card h3 {
+        color: #1552a4;
+        font-size: 12px;
+        margin: 0 0 9px;
+    }
+
+    .job-detail-page .application-card p {
+        color: #778196;
+        font-size: 11px;
+        margin: 0;
+    }
+
+    .job-detail-page .application-btn {
+        min-width: 185px;
+    }
+
+    @@media (max-width: 900px) {
+        .job-detail-page .job-info-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .job-detail-page {
+            padding: 16px 10px;
+        }
+
+        .job-detail-page .page-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .job-detail-page .heading-actions {
+            flex-wrap: wrap;
+        }
+
+        .job-detail-page .job-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .job-detail-page .application-card {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .job-detail-page .application-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="job-detail-page">
+    <div class="breadcrumb">
+        Nhà tuyển dụng &nbsp;/&nbsp; Tin tuyển dụng &nbsp;/&nbsp; Chi tiết tin tuyển dụng
+    </div>
+
+    <div class="page-heading">
+        <div>
+            <h1>Chi tiết tin tuyển dụng</h1>
+            <p class="subtitle">Xem đầy đủ thông tin và quản lý tin tuyển dụng.</p>
+        </div>
+
+        <div class="heading-actions">
+            <a asp-controller="Employer"
+               asp-action="Edit"
+               asp-route-id="@maTin"
+               class="action-btn">
+                Chỉnh sửa tin
+            </a>
+
+            <a asp-controller="Employer"
+               asp-action="Delete"
+               asp-route-id="@maTin"
+               class="action-btn delete-btn">
+                Xóa tin
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <div class="job-summary-title">
+            <div>
+                <h2>@Model?.TieuDe</h2>
+                <div class="company-name">@tenCongTy</div>
+            </div>
+
+            <span class="status @(trangThai.Contains("Bản nháp", StringComparison.OrdinalIgnoreCase) ? "status-draft" : (trangThai.Contains("Đóng", StringComparison.OrdinalIgnoreCase) ? "status-closed" : ""))">
+                @trangThai.ToUpper()
+            </span>
+        </div>
+
+        <div class="job-info-grid">
+            <div class="info-item">
+                <span class="info-label">Mã tin</span>
+                <span class="info-value">WC-@maTin.ToString("D4")</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Ngành nghề</span>
+                <span class="info-value">@nganhNghe</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Số lượng</span>
+                <span class="info-value">@soLuong</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Mức lương</span>
+                <span class="info-value">@mucLuong</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Địa điểm</span>
+                <span class="info-value">@diaDiem</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Hình thức</span>
+                <span class="info-value">@hinhThuc</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Kinh nghiệm</span>
+                <span class="info-value">@kinhNghiem</span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Ngày đăng</span>
+                <span class="info-value">
+                    @(Model?.NgayDang.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                </span>
+            </div>
+
+            <div class="info-item">
+                <span class="info-label">Hạn nộp</span>
+                <span class="info-value">
+                    @(Model?.HanUngTuyen.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-card section-card">
+        <div class="section-number">01</div>
+        <div class="section-content">
+            <h3>MÔ TẢ CÔNG VIỆC</h3>
+            <p>@moTa</p>
+        </div>
+    </div>
+
+    <div class="detail-card section-card">
+        <div class="section-number">02</div>
+        <div class="section-content">
+            <h3>YÊU CẦU ỨNG VIÊN</h3>
+            <p>@yeuCau</p>
+        </div>
+    </div>
+
+    <div class="detail-card section-card">
+        <div class="section-number">03</div>
+        <div class="section-content">
+            <h3>QUYỀN LỢI</h3>
+            <p>@quyenLoi</p>
+        </div>
+    </div>
+
+    <div class="detail-card section-card">
+        <div class="section-number">04</div>
+        <div class="section-content">
+            <h3>THÔNG TIN BỔ SUNG</h3>
+            <p>@thongTinBoSung</p>
+        </div>
+    </div>
+
+    <div class="detail-card application-card">
+        <div>
+            <h3>HỒ SƠ ỨNG TUYỂN</h3>
+            <p>
+                @soHoSo hồ sơ đã nộp
+            </p>
+        </div>
+
+        <a asp-controller="Employer"
+           asp-action="Applications"
+           asp-route-id="@maTin"
+           class="action-btn application-btn">
+            Xem hồ sơ ứng viên
+        </a>
+    </div>
+</div>
