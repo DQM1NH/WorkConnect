@@ -23,11 +23,54 @@ namespace WorkConnect.Controllers
 
        
        // Trang chính của nhà tuyển dụng
+        
         [Authorize(Roles = "Employer")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return RedirectToAction(nameof(Jobs));
+            var maTaiKhoan = GetMaTaiKhoan();
+
+            if (maTaiKhoan == null)
+                return Challenge();
+
+            var maNhaTuyenDung = await GetMaNhaTuyenDung(
+                maTaiKhoan.Value);
+
+            if (maNhaTuyenDung == null)
+                return NotFound("Tài khoản chưa có hồ sơ nhà tuyển dụng.");
+
+            var jobs = await _context.TinTuyenDungs
+                .AsNoTracking()
+                .Where(x => x.MaNhaTuyenDung == maNhaTuyenDung.Value)
+                .OrderByDescending(x => x.NgayDang)
+                .ToListAsync();
+
+            var model = new WorkConnect.Models.Employer.EmployerDashboardViewModel
+            {
+                TotalJobs = jobs.Count,
+
+                RecruitingJobs = jobs.Count(x =>
+                    (x.TrangThai ?? "").Contains(
+                        "đang tuyển", StringComparison.OrdinalIgnoreCase)),
+
+                PendingJobs = jobs.Count(x =>
+                    (x.TrangThai ?? "").Contains(
+                        "chờ duyệt", StringComparison.OrdinalIgnoreCase)),
+
+                ExpiredJobs = jobs.Count(x =>
+                    (x.TrangThai ?? "").Contains(
+                        "hết hạn", StringComparison.OrdinalIgnoreCase)),
+
+                TotalApplications = await _context.DonUngTuyens
+                    .CountAsync(x =>
+                        x.TinTuyenDung != null &&
+                        x.TinTuyenDung.MaNhaTuyenDung == maNhaTuyenDung.Value),
+
+                RecentJobs = jobs.Take(5).ToList()
+            };
+
+            return View(model);
         }
+
 
         // Chi tiết hồ sơ nhà tuyển dụng
         [Authorize(Roles = "Employer")]
@@ -580,6 +623,121 @@ namespace WorkConnect.Controllers
             return null;
         }
 
+        // GET: Employer/Applications/5
+        // Xem hồ sơ ứng tuyển của một tin thuộc nhà tuyển dụng hiện tại.
+        [Authorize(Roles = "Employer")]
+        public async Task<IActionResult> Applications(int id)
+        {
+            var maTaiKhoan = GetMaTaiKhoan();
+
+            if (maTaiKhoan == null)
+                return Challenge();
+
+            var maNhaTuyenDung = await GetMaNhaTuyenDung(
+                maTaiKhoan.Value);
+
+            if (maNhaTuyenDung == null)
+                return NotFound("Tài khoản chưa có hồ sơ nhà tuyển dụng.");
+
+            // Kiểm tra tin tuyển dụng có thuộc nhà tuyển dụng đang đăng nhập không.
+            var job = await _context.TinTuyenDungs
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.MaTin == id &&
+                    x.MaNhaTuyenDung == maNhaTuyenDung.Value);
+
+            if (job == null)
+                return NotFound("Không tìm thấy tin tuyển dụng.");
+
+            // Chỉ lấy hồ sơ ứng tuyển thuộc tin đã xác minh ở trên.
+            var applications = await _context.DonUngTuyens
+                .AsNoTracking()
+                .Where(x => x.MaTin == job.MaTin)
+                .Include(x => x.UngVien)
+                .Include(x => x.CV)
+                .Include(x => x.TrangThai)
+                .OrderByDescending(x => x.NgayNop)
+                .ToListAsync();
+
+            ViewBag.MaTin = job.MaTin;
+            ViewBag.TieuDeTin = job.TieuDe;
+
+            return View(applications);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> SearchCandidates(
+            string? keyword,
+            string? chuyenNganh,
+            string? kyNang,
+            string? kinhNghiem)
+        {
+            var candidates = _context.UngViens
+                .Include(x => x.DiaDiem)
+                .Include(x => x.TrinhDo)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                candidates = candidates.Where(x =>
+                    x.HoTen.Contains(keyword) ||
+                    x.Truong.Contains(keyword) ||
+                    x.ChuyenNganh.Contains(keyword) ||
+                    x.KyNang.Contains(keyword));
+            }
+
+            if (!string.IsNullOrWhiteSpace(chuyenNganh))
+            {
+                candidates = candidates.Where(x =>
+                    x.ChuyenNganh.Contains(chuyenNganh));
+            }
+
+            if (!string.IsNullOrWhiteSpace(kyNang))
+            {
+                candidates = candidates.Where(x =>
+                    x.KyNang.Contains(kyNang));
+            }
+
+            if (!string.IsNullOrWhiteSpace(kinhNghiem))
+            {
+                candidates = candidates.Where(x =>
+                    x.KinhNghiem != null &&
+                    x.KinhNghiem.Contains(kinhNghiem));
+            }
+
+            var model = new CandidateSearchViewModel
+            {
+                Keyword = keyword,
+                ChuyenNganh = chuyenNganh,
+                KyNang = kyNang,
+                KinhNghiem = kinhNghiem,
+                Candidates = await candidates
+                    .OrderBy(x => x.HoTen)
+                    .ToListAsync()
+            };
+
+            return View(model);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> CandidateDetails(int id)
+        {
+            var candidate = await _context.UngViens
+                .AsNoTracking()
+                .Include(x => x.DiaDiem)
+                .Include(x => x.TrinhDo)
+                .FirstOrDefaultAsync(x => x.MaUngVien == id);
+
+            if (candidate == null)
+            {
+                return NotFound("Không tìm thấy hồ sơ ứng viên.");
+            }
+
+            return View(candidate);
+        }
+
+
+
         // Tìm mã hồ sơ nhà tuyển dụng theo tài khoản
         private async Task<int?> GetMaNhaTuyenDung(int maTaiKhoan)
         {
@@ -589,6 +747,7 @@ namespace WorkConnect.Controllers
                 .Select(x => (int?)x.MaNhaTuyenDung)
                 .FirstOrDefaultAsync();
         }
+
 
         // Tạo slug từ tiêu đề
         private static string CreateSlug(string text)

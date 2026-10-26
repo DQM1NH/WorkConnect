@@ -1,0 +1,118 @@
+
+@model IEnumerable<WorkConnect.Models.Entities.DonUngTuyen>
+
+@{
+    ViewData["Title"] = "Hồ sơ ứng tuyển";
+    ViewData["UseEmployerLayout"] = true;
+    var tieuDeTin = ViewBag.TieuDeTin as string ?? "Tin tuyển dụng";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Hồ sơ ứng tuyển</h2>
+            <p class="text-muted mb-0">@tieuDeTin</p>
+        </div>
+
+        <a asp-controller="Employer"
+           asp-action="Jobs"
+           class="btn btn-outline-secondary">
+            Quay lại danh sách tin
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">
+                Danh sách hồ sơ
+                <span class="badge bg-primary">
+                    @(Model?.Count() ?? 0)
+                </span>
+            </h5>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info mb-0">
+                    Chưa có ứng viên nộp hồ sơ cho tin tuyển dụng này.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>STT</th>
+                                <th>Ứng viên</th>
+                                <th>Thông tin liên hệ</th>
+                                <th>Ngày nộp</th>
+                                <th>Trạng thái</th>
+                                <th>CV</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var stt = 0;
+                            }
+
+                            @foreach (var don in Model)
+                            {
+                                stt++;
+
+                                <tr>
+                                    <td>@stt</td>
+                                    <td>
+                                        <strong>
+                                            @(!string.IsNullOrWhiteSpace(don.HoTen)
+                                                ? don.HoTen
+                                                : don.UngVien?.HoTen ?? "Chưa cập nhật")
+                                        </strong>
+                                        <div class="small text-muted">
+                                            Mã ứng viên: @don.MaUngVien
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            @(!string.IsNullOrWhiteSpace(don.Email)
+                                                ? don.Email
+                                                : don.UngVien?.EmailLienHe ?? "Chưa có email")
+                                        </div>
+                                        <div class="small text-muted">
+                                            @(!string.IsNullOrWhiteSpace(don.SoDienThoai)
+                                                ? don.SoDienThoai
+                                                : don.UngVien?.SoDienThoaiLienHe ?? "Chưa có số điện thoại")
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @don.NgayNop.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        Mã trạng thái: @don.MaTrangThai
+                                    </td>
+                                    <td>
+                                        @if (don.CV != null &&
+                                             !string.IsNullOrWhiteSpace(don.CV.DuongDanTep))
+                                        {
+                                            <span>@don.CV.TenTep</span>
+                                            <div>
+                                                <a href="@don.CV.DuongDanTep"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer">
+                                                    Mở CV
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Chưa có CV</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

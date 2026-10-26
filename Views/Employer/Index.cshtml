@@ -1,48 +1,101 @@
 
-@model IEnumerable<WorkConnect.Models.Entities.NhaTuyenDung>
+@model WorkConnect.Models.Employer.EmployerDashboardViewModel
 
 @{
-    ViewData["Title"] = "Danh sách nhà tuyển dụng";
+    Layout = "_Layout";
+    ViewData["Title"] = "Tổng quan nhà tuyển dụng";
+    ViewData["UseEmployerLayout"] = true;
 }
 
-<div class="container mt-4">
-    <h2>Danh sách nhà tuyển dụng</h2>
-    <hr />
+<div class="container-fluid py-4">
+    <h2 class="mb-1">Tổng quan</h2>
+    <p class="text-muted">Tình hình tuyển dụng của công ty bạn.</p>
 
-    @if (Model == null || !Model.Any())
-    {
-        <p>Chưa có thông tin nhà tuyển dụng.</p>
-    }
-    else
-    {
-        <table class="table table-bordered table-striped">
-            <thead>
-                <tr>
-                    <th>Mã nhà tuyển dụng</th>
-                    <th>Tên công ty</th>
-                    <th>Email liên hệ</th>
-                    <th>Số điện thoại</th>
-                    <th>Địa chỉ</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var employer in Model)
-                {
-                    <tr>
-                        <td>@employer.MaNhaTuyenDung</td>
-                        <td>
-                            <a asp-controller="Employer"
-                            asp-action="Details"
-                            asp-route-id="@employer.MaNhaTuyenDung">
-                                @employer.TenCongTy
-                            </a>
-                        </td>
-                        <td>@employer.EmailLienHe</td>
-                        <td>@employer.SoDienThoaiLienHe</td>
-                        <td>@employer.DiaChi</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 h-100">
+                <div class="text-muted">Tổng tin</div>
+                <h2>@Model.TotalJobs</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 h-100">
+                <div class="text-muted">Đang tuyển</div>
+                <h2>@Model.RecruitingJobs</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 h-100">
+                <div class="text-muted">Chờ duyệt</div>
+                <h2>@Model.PendingJobs</h2>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card p-3 h-100">
+                <div class="text-muted">Hết hạn</div>
+                <h2>@Model.ExpiredJobs</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-3 mb-4">
+        <div class="text-muted">Tổng hồ sơ ứng tuyển</div>
+        <h2>@Model.TotalApplications</h2>
+    </div>
+
+    <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Tin tuyển dụng gần đây</h5>
+            <a asp-controller="Employer"
+               asp-action="Jobs"
+               class="btn btn-outline-primary btn-sm">
+                Xem tất cả
+            </a>
+        </div>
+
+        @if (Model.RecentJobs.Count == 0)
+        {
+            <p class="text-muted mb-0">
+                Công ty chưa có tin tuyển dụng nào.
+            </p>
+            <div class="mt-3">
+                <a asp-controller="Employer"
+                   asp-action="Create"
+                   class="btn btn-primary">
+                    Đăng tin mới
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Mã tin</th>
+                            <th>Tiêu đề</th>
+                            <th>Ngày đăng</th>
+                            <th>Hạn ứng tuyển</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var job in Model.RecentJobs)
+                        {
+                            <tr>
+                                <td>#@job.MaTin</td>
+                                <td>@job.TieuDe</td>
+                                <td>@job.NgayDang.ToString("dd/MM/yyyy")</td>
+                                <td>@job.HanUngTuyen.ToString("dd/MM/yyyy")</td>
+                                <td>@job.TrangThai</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>

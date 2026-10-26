@@ -137,6 +137,7 @@ namespace WorkConnect.Controllers
             return View();
         }
 
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -146,44 +147,140 @@ namespace WorkConnect.Controllers
 
             var email = model.Email.Trim().ToLowerInvariant();
 
-            // Kiểm tra email đã tồn tại.
+            // Chỉ chấp nhận hai loại tài khoản hợp lệ.
+            if (model.Role != "Candidate" && model.Role != "Employer")
+            {
+                ModelState.AddModelError(nameof(model.Role),
+                    "Loại tài khoản không hợp lệ.");
+                return View(model);
+            }
+
+            // Kiểm tra email đã được sử dụng chưa.
             var emailExists = await _context.TaiKhoans
                 .AnyAsync(x => x.Email.ToLower() == email);
 
             if (emailExists)
             {
-                ModelState.AddModelError(
-                    nameof(model.Email),
+                ModelState.AddModelError(nameof(model.Email),
                     "Email này đã được sử dụng.");
-
                 return View(model);
             }
 
-            // Tạo tài khoản ứng viên.
-            
+            // Kiểm tra thông tin riêng của nhà tuyển dụng.
+            if (model.Role == "Employer")
+            {
+                if (string.IsNullOrWhiteSpace(model.TenCongTy))
+                    ModelState.AddModelError(nameof(model.TenCongTy),
+                        "Vui lòng nhập tên công ty.");
+
+                if (string.IsNullOrWhiteSpace(model.DiaChiCongTy))
+                    ModelState.AddModelError(nameof(model.DiaChiCongTy),
+                        "Vui lòng nhập địa chỉ công ty.");
+
+                if (string.IsNullOrWhiteSpace(model.SoDienThoaiCongTy))
+                    ModelState.AddModelError(nameof(model.SoDienThoaiCongTy),
+                        "Vui lòng nhập số điện thoại công ty.");
+
+                if (model.MaNganhNghe == null ||
+                    !await _context.NganhNghes
+                        .AnyAsync(x => x.MaNganhNghe == model.MaNganhNghe.Value))
+                {
+                    ModelState.AddModelError(nameof(model.MaNganhNghe),
+                        "Vui lòng chọn ngành nghề hợp lệ.");
+                }
+
+                if (model.MaQuyMo.HasValue &&
+                    !await _context.QuyMoCongTies
+                        .AnyAsync(x => x.MaQuyMo == model.MaQuyMo.Value))
+                {
+                    ModelState.AddModelError(nameof(model.MaQuyMo),
+                        "Quy mô công ty không hợp lệ.");
+                }
+
+                if (!string.IsNullOrWhiteSpace(model.WebsiteCongTy) &&
+                    !model.WebsiteCongTy.StartsWith("https://",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !model.WebsiteCongTy.StartsWith("http://",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(nameof(model.WebsiteCongTy),
+                        "Website phải bắt đầu bằng http:// hoặc https://.");
+                }
+
+                if (string.IsNullOrWhiteSpace(model.GioiThieuCongTy))
+                    ModelState.AddModelError(nameof(model.GioiThieuCongTy),
+                        "Vui lòng giới thiệu công ty.");
+
+                if (!ModelState.IsValid)
+                    return View(model);
+            }
+
+            // Tạo tài khoản theo vai trò đã chọn.
             var user = new TaiKhoan
             {
-                MaVaiTro = 3,
+                MaVaiTro = model.Role == "Employer" ? 2 : 3,
                 Email = email,
                 HoTen = $"{model.FirstName.Trim()} {model.LastName.Trim()}",
                 MatKhauMaHoa = string.Empty,
+
+                // Giữ số điện thoại hợp lệ để đáp ứng CHECK của bảng TaiKhoan.
+                // Số liên hệ công ty được lưu riêng trong hồ sơ nhà tuyển dụng.
                 SoDienThoai = "0900000000",
+
                 BiKhoa = false,
                 NgayTao = DateTime.Now
             };
 
-            // Băm mật khẩu trước khi lưu.
-            user.MatKhauMaHoa = _hasher.HashPassword(
-                user, model.Password);
+            user.MatKhauMaHoa =
+                _hasher.HashPassword(user, model.Password);
 
-            _context.TaiKhoans.Add(user);
-            await _context.SaveChangesAsync();
+            // Tạo tài khoản và hồ sơ công ty trong cùng transaction.
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                _context.TaiKhoans.Add(user);
+                await _context.SaveChangesAsync();
+
+                if (model.Role == "Employer")
+                {
+                    var employer = new NhaTuyenDung
+                    {
+                        MaTaiKhoan = user.MaTaiKhoan,
+                        TenCongTy = model.TenCongTy!.Trim(),
+                        EmailLienHe = email,
+                        SoDienThoaiLienHe =
+                            model.SoDienThoaiCongTy!.Trim(),
+                        DiaChi = model.DiaChiCongTy!.Trim(),
+                        Website = string.IsNullOrWhiteSpace(model.WebsiteCongTy)
+                            ? null
+                            : model.WebsiteCongTy.Trim(),
+                        MaNganhNghe = model.MaNganhNghe!.Value,
+                        MaQuyMo = model.MaQuyMo,
+                        GioiThieu = model.GioiThieuCongTy!.Trim()
+                    };
+
+                    _context.NhaTuyenDungs.Add(employer);
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                ModelState.AddModelError("",
+                    "Không thể đăng ký tài khoản. Vui lòng kiểm tra thông tin và thử lại.");
+                return View(model);
+            }
 
             TempData["SuccessMessage"] =
                 "Đăng ký thành công. Bạn có thể đăng nhập.";
 
             return RedirectToAction("Login");
         }
+
 
         
 

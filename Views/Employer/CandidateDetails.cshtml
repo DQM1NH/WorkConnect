@@ -1,0 +1,46 @@
+
+@model WorkConnect.Models.Entities.UngVien
+
+@{
+    ViewData["Title"] = "Chi tiết hồ sơ ứng viên";
+}
+
+<div class="container mt-4 mb-5">
+    <h2>Chi tiết hồ sơ ứng viên</h2>
+    <hr />
+
+    <div class="card">
+        <div class="card-body">
+            <h4 class="mb-3">@Model.HoTen</h4>
+
+            <p><strong>Ngày sinh:</strong> @Model.NgaySinh.ToString("dd/MM/yyyy")</p>
+            <p><strong>Giới tính:</strong> @(Model.GioiTinh ?? "Chưa cập nhật")</p>
+            <p><strong>Email liên hệ:</strong> @Model.EmailLienHe</p>
+            <p><strong>Số điện thoại:</strong> @Model.SoDienThoaiLienHe</p>
+            <p><strong>Địa điểm:</strong> @(Model.DiaDiem?.TenDiaDiem ?? "Chưa cập nhật")</p>
+
+            <hr />
+            <h5>Thông tin học vấn</h5>
+            <p><strong>Trường:</strong> @Model.Truong</p>
+            <p><strong>Chuyên ngành:</strong> @Model.ChuyenNganh</p>
+            <p><strong>Trình độ:</strong> @(Model.TrinhDo?.TenTrinhDo ?? "Chưa cập nhật")</p>
+            <p><strong>Năm tốt nghiệp:</strong> @(Model.NamTotNghiep?.ToString() ?? "Chưa cập nhật")</p>
+
+            <hr />
+            <h5>Kỹ năng và kinh nghiệm</h5>
+            <p><strong>Kỹ năng:</strong> @(string.IsNullOrWhiteSpace(Model.KyNang) ? "Chưa cập nhật" : Model.KyNang)</p>
+            <p><strong>Kinh nghiệm:</strong> @(string.IsNullOrWhiteSpace(Model.KinhNghiem) ? "Chưa cập nhật" : Model.KinhNghiem)</p>
+            <p><strong>Chứng chỉ:</strong> @(string.IsNullOrWhiteSpace(Model.ChungChi) ? "Chưa cập nhật" : Model.ChungChi)</p>
+
+            <hr />
+            <h5>Mục tiêu nghề nghiệp</h5>
+            <p>@(string.IsNullOrWhiteSpace(Model.MucTieuNgheNghiep) ? "Chưa cập nhật" : Model.MucTieuNgheNghiep)</p>
+
+            <a asp-controller="Employer"
+               asp-action="SearchCandidates"
+               class="btn btn-secondary mt-3">
+                Quay lại danh sách ứng viên
+            </a>
+        </div>
+    </div>
+</div>

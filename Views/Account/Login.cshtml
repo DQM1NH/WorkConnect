@@ -1,4 +1,10 @@
 @model LoginViewModel
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["SuccessMessage"]
+    </div>
+}
 @{
     ViewData["Title"] = "Đăng nhập - WorkConnect";
 }

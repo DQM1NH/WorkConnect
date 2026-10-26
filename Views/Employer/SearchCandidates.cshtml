@@ -1,0 +1,127 @@
+
+@model WorkConnect.Models.Employer.CandidateSearchViewModel
+
+@{
+    ViewData["Title"] = "Tìm kiếm ứng viên";
+    ViewData["UseEmployerLayout"] = true;
+}
+
+<div class="container mt-4 mb-5">
+    <h2>Tìm kiếm ứng viên</h2>
+    <p class="text-muted">
+        Tìm ứng viên theo từ khóa, chuyên ngành, kỹ năng và kinh nghiệm.
+    </p>
+
+    <form asp-controller="Employer"
+          asp-action="SearchCandidates"
+          method="get"
+          class="card card-body mb-4">
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="keyword" class="form-label">Từ khóa</label>
+                <input id="keyword"
+                       name="keyword"
+                       value="@Model.Keyword"
+                       class="form-control"
+                       placeholder="Tên ứng viên, trường học..." />
+            </div>
+
+            <div class="col-md-6">
+                <label for="chuyenNganh" class="form-label">Chuyên ngành</label>
+                <input id="chuyenNganh"
+                       name="chuyenNganh"
+                       value="@Model.ChuyenNganh"
+                       class="form-control"
+                       placeholder="Ví dụ: Công nghệ thông tin" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="kyNang" class="form-label">Kỹ năng</label>
+                <input id="kyNang"
+                       name="kyNang"
+                       value="@Model.KyNang"
+                       class="form-control"
+                       placeholder="Ví dụ: C#, SQL, Java" />
+            </div>
+
+            <div class="col-md-6">
+                <label for="kinhNghiem" class="form-label">Kinh nghiệm</label>
+                <input id="kinhNghiem"
+                       name="kinhNghiem"
+                       value="@Model.KinhNghiem"
+                       class="form-control"
+                       placeholder="Ví dụ: 1 năm, thực tập..." />
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                Tìm kiếm
+            </button>
+
+            <a asp-controller="Employer"
+               asp-action="SearchCandidates"
+               class="btn btn-outline-secondary">
+                Xóa bộ lọc
+            </a>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Danh sách ứng viên</h4>
+        <span class="text-muted">
+            Tìm thấy @Model.Candidates.Count ứng viên
+        </span>
+    </div>
+
+    @if (Model.Candidates.Count == 0)
+    {
+        <div class="alert alert-info">
+            Không tìm thấy ứng viên phù hợp. Bạn hãy thử thay đổi điều kiện tìm kiếm.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Họ tên</th>
+                        <th>Chuyên ngành</th>
+                        <th>Trường học</th>
+                        <th>Kỹ năng</th>
+                        <th>Kinh nghiệm</th>
+                        <th>Địa điểm</th>
+                        <th>Trình độ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var candidate in Model.Candidates)
+                    {
+                        <tr>
+                            <td>@candidate.HoTen</td>
+                            <td>@candidate.ChuyenNganh</td>
+                            <td>@candidate.Truong</td>
+                            <td>@candidate.KyNang</td>
+                            <td>@(string.IsNullOrWhiteSpace(candidate.KinhNghiem)
+                                ? "Chưa cập nhật"
+                                : candidate.KinhNghiem)</td>
+                            <td>@(candidate.DiaDiem?.TenDiaDiem ?? "Chưa cập nhật")</td>
+                            <td>@(candidate.TrinhDo?.TenTrinhDo ?? "Chưa cập nhật")</td>
+                            <td>
+                                <a asp-controller="Employer"
+                                asp-action="CandidateDetails"
+                                asp-route-id="@candidate.MaUngVien"
+                                class="btn btn-sm btn-primary">
+                                    Xem hồ sơ
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
