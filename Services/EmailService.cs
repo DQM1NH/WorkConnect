@@ -27,7 +27,12 @@ namespace WorkConnect.Services
 
             using var client = new SmtpClient();
             await client.ConnectAsync(_config["EmailSettings:SmtpServer"], int.Parse(_config["EmailSettings:Port"]), MailKit.Security.SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(_config["EmailSettings:Username"], _config["EmailSettings:Password"]);
+            var password = _config["EmailSettings:Password"];
+            if (string.IsNullOrWhiteSpace(password))
+                throw new InvalidOperationException(
+                    "Thiếu EmailSettings:Password. Hãy đặt bằng User Secrets (dev) hoặc biến môi trường EmailSettings__Password (production), không ghi vào appsettings.json.");
+
+            await client.AuthenticateAsync(_config["EmailSettings:Username"], password);
             await client.SendAsync(emailMessage);
             await client.DisconnectAsync(true);
         }

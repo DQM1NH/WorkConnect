@@ -1,24 +1,23 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WorkConnect.Models;
+using WorkConnect.Services;
 
 namespace WorkConnect.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
+    private readonly IJobService _jobService;
+    public HomeController(IJobService jobService)
     {
-        return View();
+        _jobService = jobService;
     }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+    public async Task<IActionResult> Index() => View(await _jobService.GetHomeAsync());
+
+    public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    }
+        => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 }

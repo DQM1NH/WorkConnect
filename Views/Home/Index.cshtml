@@ -1,8 +1,86 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+    ViewData["Description"] = "WorkConnect - sàn việc làm, thực tập, bán thời gian dành cho sinh viên và người mới tốt nghiệp.";
 }
+<link rel="stylesheet" href="~/css/job.css"/>
+<link rel="stylesheet" href="~/css/home.css"/>
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="home-hero">
+    <h1>Tìm việc làm, thực tập dành cho sinh viên</h1>
+    <p><strong>@Model.TotalJobs</strong> việc làm đang tuyển · <strong>@Model.TotalEmployers</strong> nhà tuyển dụng</p>
+
+    <form method="get" asp-controller="Job" asp-action="Index" class="hero-search">
+        <input name="Keyword" type="text" maxlength="100" placeholder="Tiêu đề, vị trí hoặc công ty" />
+        <select name="MaNganhNghe">
+            <option value="">Tất cả ngành nghề</option>
+            @foreach (var o in Model.Options.NganhNghes) { <option value="@o.Id">@o.Name</option> }
+        </select>
+        <select name="MaDiaDiem">
+            <option value="">Tất cả địa điểm</option>
+            @foreach (var o in Model.Options.DiaDiems) { <option value="@o.Id">@o.Name</option> }
+        </select>
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+    </form>
+
+    <div class="hero-quick">
+        Gợi ý:
+        <a asp-controller="Job" asp-action="Index" asp-route-MaLoaiHinh="1">Thực tập</a>
+        <a asp-controller="Job" asp-action="Index" asp-route-MaLoaiHinh="2">Bán thời gian</a>
+        <a asp-controller="Job" asp-action="Index" asp-route-MaLoaiHinh="4">Mới tốt nghiệp</a>
+        <a asp-controller="Job" asp-action="Index" asp-route-MaHinhThuc="2">Làm việc từ xa</a>
+    </div>
+</section>
+
+<section class="home-section">
+    <h2 class="home-title">Việc làm theo ngành nghề</h2>
+    <div class="cat-grid">
+        @foreach (var c in Model.Categories)
+        {
+            <a asp-controller="Job" asp-action="Index" asp-route-MaNganhNghe="@c.Id" class="cat-card">
+                <strong>@c.Name</strong><span>@c.Count việc làm</span>
+            </a>
+        }
+    </div>
+</section>
+
+<section class="home-section">
+    <div class="home-title-row">
+        <h2 class="home-title">Việc làm mới nhất</h2>
+        <a asp-controller="Job" asp-action="Index">Xem tất cả →</a>
+    </div>
+    <div class="home-jobs">
+        @foreach (var j in Model.Latest)
+        {
+            <article class="job-card">
+                <div class="job-logo">@j.TenCongTy.Substring(0, 1)</div>
+                <div class="job-card-main">
+                    <h3 class="job-card-title"><a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien">@j.TieuDe</a></h3>
+                    <p class="job-card-company">@j.TenCongTy</p>
+                    <ul class="job-tags">
+                        <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
+                        <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
+                    </ul>
+                </div>
+                <div class="job-card-side">
+                    <div class="job-salary-text">@j.LuongHienThi</div>
+                    <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="home-section">
+    <h2 class="home-title">Nhà tuyển dụng hàng đầu</h2>
+    <div class="emp-grid">
+        @foreach (var e in Model.Employers)
+        {
+            <a asp-controller="Job" asp-action="Index" asp-route-Keyword="@e.Name" class="emp-card">
+                <div class="job-logo">@e.Name.Substring(0, 1)</div>
+                <strong>@e.Name</strong><span>@e.JobCount việc làm</span>
+            </a>
+        }
+    </div>
+</section>

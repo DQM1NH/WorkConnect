@@ -1,0 +1,124 @@
+@using System.Globalization
+@model JobSearchViewModel
+@{
+    ViewData["Title"] = "Tìm việc làm dành cho sinh viên";
+    ViewData["Description"] = "Tìm kiếm và lọc việc làm, thực tập, bán thời gian cho sinh viên và người mới tốt nghiệp trên WorkConnect.";
+    var f = Model.Filter;
+    var inv = CultureInfo.InvariantCulture;
+}
+
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+
+<section class="job-page">
+    <h1 class="job-page-title">Tìm việc làm</h1>
+
+    <div class="row g-4">
+        <!-- Bộ lọc (BM07) -->
+        <div class="col-12 col-lg-3">
+            <form id="jobFilterForm" method="get" asp-controller="Job" asp-action="Index"
+                  data-search-url="@Url.Action("Search", "Job")" class="job-filter">
+
+                <div class="job-field">
+                    <label for="fKeyword">Từ khóa</label>
+                    <input id="fKeyword" name="Keyword" type="text" maxlength="100" class="form-control"
+                           placeholder="Tiêu đề, vị trí hoặc công ty" value="@f.Keyword" />
+                </div>
+
+                <div class="job-field">
+                    <label for="fNganh">Ngành nghề</label>
+                    <select id="fNganh" name="MaNganhNghe" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var o in Model.Options.NganhNghes)
+                        {
+                            <option value="@o.Id" selected="@(f.MaNganhNghe == o.Id)">@o.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="job-field">
+                    <label for="fDiaDiem">Địa điểm</label>
+                    <select id="fDiaDiem" name="MaDiaDiem" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var o in Model.Options.DiaDiems)
+                        {
+                            <option value="@o.Id" selected="@(f.MaDiaDiem == o.Id)">@o.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="job-field">
+                    <label>Mức lương (triệu đồng)</label>
+                    <div class="job-salary">
+                        <input name="LuongTuTrieu" type="number" min="0" max="100000" step="0.5" class="form-control"
+                               placeholder="Từ" aria-label="Lương tối thiểu"
+                               value="@(f.LuongTuTrieu?.ToString("0.##", inv))" />
+                        <span>–</span>
+                        <input name="LuongDenTrieu" type="number" min="0" max="100000" step="0.5" class="form-control"
+                               placeholder="Đến" aria-label="Lương tối đa"
+                               value="@(f.LuongDenTrieu?.ToString("0.##", inv))" />
+                    </div>
+                </div>
+
+                <div class="job-field">
+                    <label for="fLoaiHinh">Loại hình công việc</label>
+                    <select id="fLoaiHinh" name="MaLoaiHinh" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var o in Model.Options.LoaiHinhs)
+                        {
+                            <option value="@o.Id" selected="@(f.MaLoaiHinh == o.Id)">@o.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="job-field">
+                    <label for="fKinhNghiem">Kinh nghiệm</label>
+                    <select id="fKinhNghiem" name="MaMucKinhNghiem" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var o in Model.Options.MucKinhNghiems)
+                        {
+                            <option value="@o.Id" selected="@(f.MaMucKinhNghiem == o.Id)">@o.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="job-field">
+                    <label for="fHinhThuc">Hình thức làm việc</label>
+                    <select id="fHinhThuc" name="MaHinhThuc" class="form-select">
+                        <option value="">Tất cả</option>
+                        @foreach (var o in Model.Options.HinhThucs)
+                        {
+                            <option value="@o.Id" selected="@(f.MaHinhThuc == o.Id)">@o.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="job-field">
+                    <label for="fSort">Sắp xếp</label>
+                    <select id="fSort" name="Sort" class="form-select">
+                        <option value="moi-nhat" selected="@(f.Sort == JobSort.MoiNhat)">Mới nhất</option>
+                        <option value="luong-cao" selected="@(f.Sort == JobSort.LuongCao)">Lương cao nhất</option>
+                        <option value="sap-het-han" selected="@(f.Sort == JobSort.SapHetHan)">Sắp hết hạn</option>
+                    </select>
+                </div>
+
+                <div class="job-filter-actions">
+                    <button type="submit" class="btn-job-search"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+                    <a asp-action="Index" id="btnResetFilter" class="btn-job-reset">Xóa bộ lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Kết quả -->
+        <div class="col-12 col-lg-9">
+            <div id="jobLoading" class="job-loading" hidden>Đang tải kết quả...</div>
+            <div id="jobResults" aria-live="polite">
+                <partial name="_JobList" model="Model.Items" />
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/job-search.js" asp-append-version="true"></script>
+}

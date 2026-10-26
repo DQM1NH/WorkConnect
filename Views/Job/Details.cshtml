@@ -1,0 +1,87 @@
+@model JobDetailViewModel
+@{
+    ViewData["Title"] = $"{Model.TieuDe} - {Model.TenCongTy}";
+    ViewData["Description"] = $"{Model.TieuDe} tại {Model.TenCongTy}, {Model.DiaDiem}. Mức lương: {Model.LuongHienThi}. Hạn ứng tuyển {Model.HanUngTuyen:dd/MM/yyyy}.";
+    var website = Model.Website;
+    var websiteOk = !string.IsNullOrEmpty(website)
+        && (website.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            || website.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+}
+
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+
+<section class="job-page">
+    <p><a asp-controller="Job" asp-action="Index" class="job-back">← Quay lại danh sách việc làm</a></p>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <article class="job-detail">
+                <h1 class="job-detail-title">@Model.TieuDe</h1>
+                <p class="job-card-company">@Model.TenCongTy · @Model.ViTri</p>
+
+                @if (!Model.ConNhanDon)
+                {
+                    <div class="job-notice">Tin tuyển dụng này đã đóng hoặc đã hết hạn ứng tuyển.</div>
+                }
+
+                <h2>Mô tả công việc</h2>
+                <div class="job-text">@Model.MoTaCongViec</div>
+
+                <h2>Yêu cầu công việc</h2>
+                <div class="job-text">@Model.YeuCauCongViec</div>
+
+                <h2>Yêu cầu ứng viên</h2>
+                <div class="job-text">@Model.YeuCauUngVien</div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.QuyenLoi))
+                {
+                    <h2>Quyền lợi</h2>
+                    <div class="job-text">@Model.QuyenLoi</div>
+                }
+            </article>
+        </div>
+
+        <aside class="col-12 col-lg-4">
+            <div class="job-side-box">
+                <div class="job-salary-text">@Model.LuongHienThi</div>
+                <ul class="job-info">
+                    <li><span>Địa điểm</span><strong>@Model.DiaDiem</strong></li>
+                    <li><span>Ngành nghề</span><strong>@Model.NganhNghe</strong></li>
+                    <li><span>Loại hình</span><strong>@Model.LoaiHinh</strong></li>
+                    <li><span>Hình thức</span><strong>@Model.HinhThuc</strong></li>
+                    @if (!string.IsNullOrEmpty(Model.KinhNghiem))
+                    {
+                        <li><span>Kinh nghiệm</span><strong>@Model.KinhNghiem</strong></li>
+                    }
+                    @if (Model.SoLuongTuyen.HasValue)
+                    {
+                        <li><span>Số lượng tuyển</span><strong>@Model.SoLuongTuyen</strong></li>
+                    }
+                    <li><span>Hạn ứng tuyển</span><strong>@Model.HanUngTuyen.ToString("dd/MM/yyyy")</strong></li>
+                </ul>
+
+                @if (Model.ConNhanDon)
+                {
+                
+                    <a asp-controller="Application" asp-action="Apply" asp-route-slug="@Model.Slug" class="btn-job-search btn-job-apply">Ứng tuyển</a>
+                }
+                else
+                {
+                    <span class="btn-job-search btn-job-apply disabled" aria-disabled="true">Ngừng nhận đơn</span>
+                }
+            </div>
+
+            <div class="job-side-box">
+                <h2 class="job-side-title">Về doanh nghiệp</h2>
+                <p class="job-company-name">@Model.TenCongTy</p>
+                <p class="job-company-addr"><i class="fa-solid fa-location-dot"></i> @Model.DiaChiCongTy</p>
+                @if (websiteOk)
+                {
+                    <p><a href="@website" target="_blank" rel="noopener noreferrer nofollow">@website</a></p>
+                }
+                <div class="job-text">@Model.GioiThieuCongTy</div>
+            </div>
+        </aside>
+    </div>
+</section>

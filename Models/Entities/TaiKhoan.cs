@@ -19,5 +19,8 @@ namespace WorkConnect.Models.Entities
         public string SoDienThoai { get; set; } = string.Empty;
         public bool BiKhoa { get; set; }
         public DateTime NgayTao { get; set; }
+        public VaiTro? VaiTro { get; set; }
+        public UngVien? UngVien { get; set; }
+        public NhaTuyenDung? NhaTuyenDung { get; set; }
     }
 }
