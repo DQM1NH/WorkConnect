@@ -44,7 +44,7 @@ public class TinTuyenDung
     public string? QuyenLoi { get; set; }
     public DateTime NgayDang { get; set; }
     public DateTime HanUngTuyen { get; set; }                  // kiểu DATE
-    public string TrangThai { get; set; } = "Bản nháp";        // Bản nháp / Đang tuyển / Đã đóng
+    public string TrangThai { get; set; } = "Đang tuyển";        // Đang tuyển / Đã đóng / Đã hết hạn
 
     public NhaTuyenDung? NhaTuyenDung { get; set; }
     public NganhNghe? NganhNghe { get; set; }

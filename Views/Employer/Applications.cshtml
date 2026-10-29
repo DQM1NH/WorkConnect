@@ -1,5 +1,4 @@
-
-@model IEnumerable<WorkConnect.Models.Entities.DonUngTuyen>
+ @model IEnumerable<WorkConnect.Models.Entities.DonUngTuyen>
 
 @{
     ViewData["Title"] = "Hồ sơ ứng tuyển";
@@ -20,6 +19,20 @@
             Quay lại danh sách tin
         </a>
     </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -48,8 +61,10 @@
                                 <th>Ngày nộp</th>
                                 <th>Trạng thái</th>
                                 <th>CV</th>
+                                <th style="min-width: 320px;">Xét duyệt</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             @{
                                 var stt = 0;
@@ -61,34 +76,48 @@
 
                                 <tr>
                                     <td>@stt</td>
+
                                     <td>
                                         <strong>
                                             @(!string.IsNullOrWhiteSpace(don.HoTen)
                                                 ? don.HoTen
                                                 : don.UngVien?.HoTen ?? "Chưa cập nhật")
                                         </strong>
+
                                         <div class="small text-muted">
                                             Mã ứng viên: @don.MaUngVien
                                         </div>
                                     </td>
+
                                     <td>
                                         <div>
                                             @(!string.IsNullOrWhiteSpace(don.Email)
                                                 ? don.Email
                                                 : don.UngVien?.EmailLienHe ?? "Chưa có email")
                                         </div>
+
                                         <div class="small text-muted">
                                             @(!string.IsNullOrWhiteSpace(don.SoDienThoai)
                                                 ? don.SoDienThoai
                                                 : don.UngVien?.SoDienThoaiLienHe ?? "Chưa có số điện thoại")
                                         </div>
                                     </td>
+
                                     <td>
                                         @don.NgayNop.ToString("dd/MM/yyyy HH:mm")
                                     </td>
+
                                     <td>
-                                        Mã trạng thái: @don.MaTrangThai
+                                        <span class="badge
+                                            @(don.MaTrangThai == 4 ? "bg-success" :
+                                              don.MaTrangThai == 5 ? "bg-danger" :
+                                              don.MaTrangThai == 3 ? "bg-info text-dark" :
+                                              don.MaTrangThai == 2 ? "bg-warning text-dark" :
+                                              "bg-secondary")">
+                                            @(don.TrangThai?.TenTrangThai ?? "Chưa xác định")
+                                        </span>
                                     </td>
+
                                     <td>
                                         @if (don.CV != null &&
                                              !string.IsNullOrWhiteSpace(don.CV.DuongDanTep))
@@ -106,6 +135,100 @@
                                         {
                                             <span class="text-muted">Chưa có CV</span>
                                         }
+                                    </td>
+
+                                    <td>
+                                        <form asp-controller="Employer"
+                                              asp-action="ReviewApplication"
+                                              method="post">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="maDon"
+                                                   value="@don.MaDon" />
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Trạng thái mới
+                                                </label>
+
+                                                <select name="maTrangThai"
+                                                        class="form-select"
+                                                        required>
+                                                    <option value="2"
+                                                        selected="@(don.MaTrangThai == 2)">
+                                                        Đang xem xét
+                                                    </option>
+
+                                                    <option value="3"
+                                                        selected="@(don.MaTrangThai == 3)">
+                                                        Mời phỏng vấn
+                                                    </option>
+
+                                                    <option value="4"
+                                                        selected="@(don.MaTrangThai == 4)">
+                                                        Đạt
+                                                    </option>
+
+                                                    <option value="5"
+                                                        selected="@(don.MaTrangThai == 5)">
+                                                        Từ chối
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Thời gian phỏng vấn
+                                                </label>
+
+                                                <input type="datetime-local"
+                                                       name="thoiGianPhongVan"
+                                                       class="form-control" />
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Địa điểm phỏng vấn
+                                                </label>
+
+                                                <input type="text"
+                                                       name="diaDiemPhongVan"
+                                                       class="form-control"
+                                                       maxlength="255"
+                                                       placeholder="Nhập địa điểm" />
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Ghi chú nội bộ
+                                                </label>
+
+                                                <textarea name="ghiChuNoiBo"
+                                                          class="form-control"
+                                                          rows="2"
+                                                          maxlength="1000"
+                                                          placeholder="Ghi chú riêng của nhà tuyển dụng"></textarea>
+                                            </div>
+
+                                            <div class="mb-2">
+                                                <label class="form-label">
+                                                    Phản hồi ứng viên
+                                                </label>
+
+                                                <textarea name="phanHoiUngVien"
+                                                          class="form-control"
+                                                          rows="2"
+                                                          maxlength="1000"
+                                                          placeholder="Nội dung phản hồi ứng viên"></textarea>
+                                            </div>
+
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-sm">
+                                                Lưu xét duyệt
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             }

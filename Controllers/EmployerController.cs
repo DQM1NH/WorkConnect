@@ -600,7 +600,7 @@ namespace WorkConnect.Controllers
                 QuyenLoi = model.QuyenLoi?.Trim(),
                 NgayDang = DateTime.Now,
                 HanUngTuyen = model.HanUngTuyen.Date,
-                TrangThai = "Bản nháp"
+                TrangThai = "Đang tuyển"
             };
 
             _context.TinTuyenDungs.Add(job);
@@ -734,6 +734,106 @@ namespace WorkConnect.Controllers
             }
 
             return View(candidate);
+        }
+        // POST: Employer/ReviewApplication
+        // Nhà tuyển dụng xét duyệt hồ sơ ứng tuyển
+        [Authorize(Roles = "Employer")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReviewApplication(
+            int maDon,
+            int maTrangThai,
+            string? ghiChuNoiBo,
+            string? phanHoiUngVien,
+            DateTime? thoiGianPhongVan,
+            string? diaDiemPhongVan)
+        {
+            var maTaiKhoan = GetMaTaiKhoan();
+
+            if (maTaiKhoan == null)
+                return Challenge();
+
+            var maNhaTuyenDung = await GetMaNhaTuyenDung(
+                maTaiKhoan.Value);
+
+            if (maNhaTuyenDung == null)
+                return NotFound(
+                    "Tài khoản chưa có hồ sơ nhà tuyển dụng.");
+
+            // Chỉ cho phép trạng thái từ 2 đến 5.
+            // Trạng thái 1 = Đã gửi là trạng thái ban đầu.
+            if (maTrangThai < 2 || maTrangThai > 5)
+            {
+                return BadRequest("Trạng thái xét duyệt không hợp lệ.");
+            }
+
+            // Kiểm tra hồ sơ có thuộc tin của nhà tuyển dụng hiện tại không.
+            var don = await _context.DonUngTuyens
+                .Include(x => x.TinTuyenDung)
+                .FirstOrDefaultAsync(x =>
+                    x.MaDon == maDon &&
+                    x.TinTuyenDung != null &&
+                    x.TinTuyenDung.MaNhaTuyenDung
+                        == maNhaTuyenDung.Value);
+
+            if (don == null)
+            {
+                return NotFound(
+                    "Không tìm thấy hồ sơ hoặc bạn không có quyền xét duyệt.");
+            }
+
+            // Nếu chọn Mời phỏng vấn thì bắt buộc có thời gian và địa điểm.
+            if (maTrangThai == 3)
+            {
+                if (!thoiGianPhongVan.HasValue ||
+                    string.IsNullOrWhiteSpace(diaDiemPhongVan))
+                {
+                    TempData["Error"] =
+                        "Vui lòng nhập thời gian và địa điểm phỏng vấn.";
+
+                    return RedirectToAction(
+                        "Applications",
+                        new { id = don.MaTin });
+                }
+
+                if (thoiGianPhongVan.Value <= DateTime.Now)
+                {
+                    TempData["Error"] =
+                        "Thời gian phỏng vấn phải ở trong tương lai.";
+
+                    return RedirectToAction(
+                        "Applications",
+                        new { id = don.MaTin });
+                }
+            }
+
+            // Cập nhật trạng thái hiện tại của hồ sơ.
+            don.MaTrangThai = maTrangThai;
+
+            // Tạo bản ghi lịch sử xử lý.
+            var lichSu = new LichSuXuLyDon
+            {
+                MaDon = don.MaDon,
+                MaTrangThai = maTrangThai,
+                ThoiGianPhongVan =
+                    maTrangThai == 3 ? thoiGianPhongVan : null,
+                DiaDiemPhongVan =
+                    maTrangThai == 3 ? diaDiemPhongVan : null,
+                GhiChuNoiBo = ghiChuNoiBo,
+                PhanHoiUngVien = phanHoiUngVien,
+                NgayCapNhat = DateTime.Now
+            };
+
+            _context.LichSuXuLyDons.Add(lichSu);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] =
+                "Đã cập nhật trạng thái hồ sơ ứng tuyển.";
+
+            return RedirectToAction(
+                "Applications",
+                new { id = don.MaTin });
         }
 
 
