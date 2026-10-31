@@ -665,6 +665,7 @@ namespace WorkConnect.Controllers
             return View(applications);
         }
         
+        [Authorize(Roles = "Employer")]
         [HttpGet]
         public async Task<IActionResult> SearchCandidates(
             string? keyword,
@@ -689,7 +690,7 @@ namespace WorkConnect.Controllers
             if (!string.IsNullOrWhiteSpace(chuyenNganh))
             {
                 candidates = candidates.Where(x =>
-                    x.ChuyenNganh.Contains(chuyenNganh));
+                    x.ChuyenNganh == chuyenNganh);
             }
 
             if (!string.IsNullOrWhiteSpace(kyNang))
@@ -709,6 +710,13 @@ namespace WorkConnect.Controllers
             {
                 Keyword = keyword,
                 ChuyenNganh = chuyenNganh,
+                ChuyenNganhOptions = await _context.UngViens
+                    .AsNoTracking()
+                    .Where(x => !string.IsNullOrWhiteSpace(x.ChuyenNganh))
+                    .Select(x => x.ChuyenNganh)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToListAsync(),
                 KyNang = kyNang,
                 KinhNghiem = kinhNghiem,
                 Candidates = await candidates
@@ -719,6 +727,7 @@ namespace WorkConnect.Controllers
             return View(model);
         }
         
+        [Authorize(Roles = "Employer")]
         [HttpGet]
         public async Task<IActionResult> CandidateDetails(int id)
         {

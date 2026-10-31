@@ -46,6 +46,23 @@
         <h2>@Model.TotalApplications</h2>
     </div>
 
+    <style>
+        /* Tăng cỡ chữ chung riêng cho nội dung dashboard */
+        .employer-main .container-fluid { font-size: 16px; }
+        .employer-main .container-fluid > h2 { font-size: 28px; font-weight: 700; }
+        .employer-main .container-fluid > p { font-size: 16px; }
+        .employer-main .card .text-muted { font-size: 15px; }
+        .employer-main .card h2 { font-size: 28px; }
+        .employer-main .table { font-size: 15px; }
+        .employer-main .table thead th { font-size: 14px; }
+        .dashboard-job-status { display:inline-block; padding:6px 10px; border-radius:999px; font-size:14px; font-weight:700; white-space:nowrap; background:#eef1f5; color:#475467; border:1px solid #d8dee8; }
+        .dashboard-job-status[data-status*="đang tuyển" i], .dashboard-job-status[data-status*="đạt" i], .dashboard-job-status[data-status*="đã duyệt" i], .dashboard-job-status[data-status*="đã đăng" i] { background:#e4f3e8; color:#267342; border-color:#b7dfc5; }
+        .dashboard-job-status[data-status*="chờ duyệt" i], .dashboard-job-status[data-status*="chờ" i] { background:#fff2d7; color:#8a6414; border-color:#f0d58e; }
+        .dashboard-job-status[data-status*="hết hạn" i], .dashboard-job-status[data-status*="từ chối" i], .dashboard-job-status[data-status*="đã đóng" i] { background:#fde8e7; color:#b42318; border-color:#f4b8b4; }
+        .dashboard-job-status[data-status*="bản nháp" i] { background:#eaf0f8; color:#456181; border-color:#cbd8e8; }
+        .dashboard-job-status[data-status*="đã gửi" i] { background:#e7f0ff; color:#2457a7; border-color:#bfd5ff; }
+    </style>
+
     <div class="card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Tin tuyển dụng gần đây</h5>
@@ -90,7 +107,11 @@
                                 <td>@job.TieuDe</td>
                                 <td>@job.NgayDang.ToString("dd/MM/yyyy")</td>
                                 <td>@job.HanUngTuyen.ToString("dd/MM/yyyy")</td>
-                                <td>@job.TrangThai</td>
+                                <td>
+                                    <span class="dashboard-job-status" data-status="@job.TrangThai">
+                                        @job.TrangThai
+                                    </span>
+                                </td>
                             </tr>
                         }
                     </tbody>

@@ -42,7 +42,7 @@
 
             <div class="job-form-grid">
                 <div class="job-field job-field-full">
-                    <label asp-for="TieuDe"></label>
+                    <label asp-for="TieuDe"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <input asp-for="TieuDe"
                            class="form-control"
                            placeholder="Nhập tiêu đề tin tuyển dụng" />
@@ -51,14 +51,14 @@
                 </div>
 
                 <div class="job-field">
-                    <label asp-for="ViTri"></label>
+                    <label asp-for="ViTri"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <input asp-for="ViTri" class="form-control" />
                     <span asp-validation-for="ViTri"
                           class="text-danger"></span>
                 </div>
 
                 <div class="job-field">
-                    <label asp-for="MaNganhNghe"></label>
+                    <label asp-for="MaNganhNghe"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <select asp-for="MaNganhNghe"
                             asp-items="Model.NganhNghes"
                             class="form-select">
@@ -69,7 +69,7 @@
                 </div>
 
                 <div class="job-field">
-                    <label asp-for="MaLoaiHinh"></label>
+                    <label asp-for="MaLoaiHinh"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <select asp-for="MaLoaiHinh"
                             asp-items="Model.LoaiHinhs"
                             class="form-select">
@@ -80,7 +80,7 @@
                 </div>
 
                 <div class="job-field">
-                    <label asp-for="MaHinhThuc"></label>
+                    <label asp-for="MaHinhThuc"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <select asp-for="MaHinhThuc"
                             asp-items="Model.HinhThucs"
                             class="form-select">
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="job-field">
-                    <label asp-for="MaDiaDiem"></label>
+                    <label asp-for="MaDiaDiem"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <select asp-for="MaDiaDiem"
                             asp-items="Model.DiaDiems"
                             class="form-select">
@@ -166,7 +166,7 @@
                 </div>
 
                 <div class="job-field job-field-full">
-                    <label asp-for="HanUngTuyen"></label>
+                    <label asp-for="HanUngTuyen"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                     <input asp-for="HanUngTuyen"
                            type="date"
                            asp-format="{0:yyyy-MM-dd}"
@@ -187,7 +187,7 @@
             </div>
 
             <div class="job-field">
-                <label asp-for="MoTaCongViec"></label>
+                <label asp-for="MoTaCongViec"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                 <textarea asp-for="MoTaCongViec"
                           class="form-control"
                           rows="5"
@@ -197,7 +197,7 @@
             </div>
 
             <div class="job-field">
-                <label asp-for="YeuCauCongViec"></label>
+                <label asp-for="YeuCauCongViec"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                 <textarea asp-for="YeuCauCongViec"
                           class="form-control"
                           rows="4"
@@ -207,7 +207,7 @@
             </div>
 
             <div class="job-field">
-                <label asp-for="YeuCauUngVien"></label>
+                <label asp-for="YeuCauUngVien"></label><span class="required-asterisk" aria-hidden="true"> *</span>
                 <textarea asp-for="YeuCauUngVien"
                           class="form-control"
                           rows="4"
@@ -240,6 +240,10 @@
         </div>
     </form>
 </div>
+
+<style>
+    .required-asterisk { color: #dc3545; font-weight: 700; }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

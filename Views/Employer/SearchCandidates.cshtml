@@ -6,7 +6,7 @@
     ViewData["UseEmployerLayout"] = true;
 }
 
-<div class="container mt-4 mb-5">
+<div class="container mt-4 mb-5 candidate-search-page">
     <h2>Tìm kiếm ứng viên</h2>
     <p class="text-muted">
         Tìm ứng viên theo từ khóa, chuyên ngành, kỹ năng và kinh nghiệm.
@@ -29,11 +29,22 @@
 
             <div class="col-md-6">
                 <label for="chuyenNganh" class="form-label">Chuyên ngành</label>
-                <input id="chuyenNganh"
-                       name="chuyenNganh"
-                       value="@Model.ChuyenNganh"
-                       class="form-control"
-                       placeholder="Ví dụ: Công nghệ thông tin" />
+                <select id="chuyenNganh"
+                        name="chuyenNganh"
+                        class="form-select">
+                    <option value="">-- Tất cả chuyên ngành --</option>
+                    @foreach (var major in Model.ChuyenNganhOptions)
+                    {
+                        if (Model.ChuyenNganh == major)
+                        {
+                            <option value="@major" selected>@major</option>
+                        }
+                        else
+                        {
+                            <option value="@major">@major</option>
+                        }
+                    }
+                </select>
             </div>
 
             <div class="col-md-6">

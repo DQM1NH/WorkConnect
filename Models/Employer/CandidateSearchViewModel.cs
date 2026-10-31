@@ -9,6 +9,9 @@ namespace WorkConnect.Models.Employer
 
         public string? ChuyenNganh { get; set; }
 
+        // Các chuyên ngành được lấy từ dữ liệu ứng viên hiện có trong DB.
+        public List<string> ChuyenNganhOptions { get; set; } = new();
+
         public string? KyNang { get; set; }
 
         public string? KinhNghiem { get; set; }

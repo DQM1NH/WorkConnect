@@ -1,4 +1,8 @@
 
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,7 +20,7 @@
             background: #f5f6f8;
             color: #252b36;
             font-family: Arial, sans-serif;
-            font-size: 13px;
+            font-size: 15px;
         }
 
         /* Thanh đầu trang */
@@ -311,7 +315,9 @@
                     ▤ &nbsp; Tin tuyển dụng
                 </a>
 
-                <a asp-controller="Employer" asp-action="SearchCandidates">
+                <a asp-controller="Employer"
+                   asp-action="SearchCandidates"
+                   class="@(currentController == "Employer" && currentAction == "SearchCandidates" ? "active" : "")">
                     ♙ &nbsp; Ứng viên
                 </a>
 
