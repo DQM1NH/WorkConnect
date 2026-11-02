@@ -54,7 +54,8 @@ namespace WorkConnect.Controllers
 
                 PendingJobs = jobs.Count(x =>
                     (x.TrangThai ?? "").Contains(
-                        "chờ duyệt", StringComparison.OrdinalIgnoreCase)),
+                        "chờ duyệt", StringComparison.OrdinalIgnoreCase) ||
+                    x.TrangThai == "Bản nháp"),
 
                 ExpiredJobs = jobs.Count(x =>
                     (x.TrangThai ?? "").Contains(
@@ -600,13 +601,13 @@ namespace WorkConnect.Controllers
                 QuyenLoi = model.QuyenLoi?.Trim(),
                 NgayDang = DateTime.Now,
                 HanUngTuyen = model.HanUngTuyen.Date,
-                TrangThai = "Đang tuyển"
+                TrangThai = "Bản nháp"
             };
 
             _context.TinTuyenDungs.Add(job);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Đăng tin thành công!";
+            TempData["SuccessMessage"] = "Đăng tin thành công! Tin đang chờ quản trị viên duyệt và sẽ được hiển thị sau khi được duyệt.";
 
             return RedirectToAction(nameof(Jobs));
         }

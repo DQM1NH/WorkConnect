@@ -54,6 +54,23 @@ builder.Services
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 
+        options.Events.OnRedirectToLogin = context =>
+        {
+            if (context.Request.IsAjaxRequest())
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            else
+                context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            if (context.Request.IsAjaxRequest())
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            else
+                context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+
         // Mỗi request kiểm tra lại: tài khoản bị khóa hoặc bị xóa thì hủy phiên đăng nhập ngay
         options.Events.OnValidatePrincipal = async context =>
         {

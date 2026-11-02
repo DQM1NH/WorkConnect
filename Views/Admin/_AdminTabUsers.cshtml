@@ -1,0 +1,85 @@
+@model AdminDashboardViewModel
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Họ và tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Ngày tham gia</th>
+                <th>Trạng thái</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Users.Items.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-4">@(Model.Users.HasSearch ? "Không tìm thấy người dùng nào phù hợp." : "Chưa có người dùng nào.")</td>
+                </tr>
+            }
+            @foreach (var user in Model.Users.Items)
+            {
+                <tr>
+                    <td>
+                        <div class="user-info-cell">
+                            <div class="user-avatar @(user.Role == "Nhà tuyển dụng" ? "avatar-emp" : "")">
+                                @(string.IsNullOrEmpty(user.FullName) ? "U" : user.FullName.Substring(0, 1).ToUpper())
+                            </div>
+                            <div>
+                                <strong>@user.FullName</strong>
+                                <br /><small class="text-muted">ID: @user.UserId</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@user.Email</td>
+                    <td>
+                        <span class="role-tag @(user.Role == "Nhà tuyển dụng" ? "role-employer" : "role-candidate")">
+                            @user.Role
+                        </span>
+                    </td>
+                    <td>@user.CreatedDate.ToString("dd/MM/yyyy")</td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <span class="badge badge-active">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-pending" style="background:#f8d7da; color:#721c24;">Bị khóa</span>
+                        }
+                    </td>
+                    <td class="action-buttons text-center">
+                        @if (user.Role == "Admin")
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                        else
+                        {
+                            <form asp-action="ToggleUserLock" asp-route-id="@user.RawId" method="post" style="display:inline;"
+                                  data-ajax-action data-confirm="@(user.IsActive ? "Khóa tài khoản này?" : "Mở khóa tài khoản này?")">
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <button type="submit" class="btn-act btn-lock">
+                                    <i class="fa-solid @(user.IsActive ? "fa-lock" : "fa-lock-open")"></i> @(user.IsActive ? "Khóa" : "Mở khóa")
+                                </button>
+                            </form>
+                            <form asp-action="DeleteAccount" asp-route-id="@user.RawId" method="post" style="display:inline;"
+                                  data-ajax-action data-confirm="Bạn có chắc chắn muốn xóa tài khoản này không?">
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <button type="submit" class="btn-act btn-delete">
+                                    <i class="fa-solid fa-trash"></i> Xóa
+                                </button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Phân trang -->
+@await Html.PartialAsync("_AdminPager", Model.Users)

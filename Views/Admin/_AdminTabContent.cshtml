@@ -1,0 +1,65 @@
+@model AdminDashboardViewModel
+@{
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Nhà tuyển dụng</th>
+                <th>Tiêu đề</th>
+                <th>Mức lương</th>
+                <th>Số lượng</th>
+                <th>Ngày đăng</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Content.Items.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-4">@(Model.Content.HasSearch ? "Không tìm thấy bài đăng nào phù hợp." : "Chưa có bài đăng nào.")</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var content in Model.Content.Items)
+                {
+                    <tr>
+                        <td>@content.EmployerName</td>
+                        <td>
+                            <strong>@content.Title</strong>
+                            @if (content.IsHidden)
+                            {
+                                <span class="badge" style="background:#e2e3e5; color:#383d41; margin-left:6px;">Đã ẩn</span>
+                            }
+                        </td>
+                        <td>@content.Salary</td>
+                        <td>@content.Quantity</td>
+                        <td>@content.PostedDate.ToString("dd/MM/yyyy")</td>
+                        <td class="action-buttons text-center">
+                            <form asp-action="ToggleJobVisibility" asp-route-id="@content.JobId" method="post" style="display:inline;"
+                                  data-ajax-action data-confirm="@(content.IsHidden ? "Hiện lại bài đăng này?" : "Ẩn bài đăng này?")">
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <button type="submit" class="btn-act btn-lock">
+                                    <i class="fa-solid @(content.IsHidden ? "fa-eye" : "fa-eye-slash")"></i> @(content.IsHidden ? "Hiện" : "Ẩn")
+                                </button>
+                            </form>
+
+                            <form asp-action="DeleteJob" asp-route-id="@content.JobId" method="post" style="display:inline;"
+                                  data-ajax-action data-confirm="Bạn có chắc chắn muốn xóa bài đăng này không? Hành động này có thể không khôi phục được!">
+                                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                <button type="submit" class="btn-act btn-delete">
+                                    <i class="fa-solid fa-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Phân trang -->
+@await Html.PartialAsync("_AdminPager", Model.Content)

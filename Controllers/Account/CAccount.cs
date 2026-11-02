@@ -83,7 +83,7 @@ namespace WorkConnect.Controllers
             ViewData["ReturnUrl"] = returnUrl;
 
             if (!ModelState.IsValid)
-                return View(model);
+                return InvalidResult(model);
 
             var email = NormalizeEmail(model.Email);
             var user = await _context.TaiKhoans.FirstOrDefaultAsync(u => u.Email == email);
@@ -105,14 +105,14 @@ namespace WorkConnect.Controllers
             if (user == null || verify == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError(string.Empty, "Email hoặc mật khẩu không đúng");
-                return View(model);
+                return InvalidResult(model);
             }
 
             // Chỉ báo khóa sau khi đã xác thực đúng mật khẩu
             if (user.BiKhoa)
             {
                 ModelState.AddModelError(string.Empty, "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên");
-                return View(model);
+                return InvalidResult(model);
             }
 
             // Thuật toán băm đã được nâng cấp -> băm lại mật khẩu bằng chuẩn mới
@@ -125,11 +125,9 @@ namespace WorkConnect.Controllers
             await SignInUserAsync(user, model.RememberMe);
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return LocalRedirect(returnUrl);
+                return RedirectOrJson(returnUrl);
 
-            return user.MaVaiTro == AppRoles.AdminId
-                ? RedirectToAction("Index", "Admin")
-                : RedirectToAction("Index", "Home");
+            return RedirectOrJson(Url.Action("Index", user.MaVaiTro == AppRoles.AdminId ? "Admin" : "Home")!);
         }
 
         // ===================== ĐĂNG KÝ =====================
@@ -151,14 +149,14 @@ namespace WorkConnect.Controllers
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return InvalidResult(model);
 
             var email = NormalizeEmail(model.Email);
 
             if (await _context.TaiKhoans.AnyAsync(u => u.Email == email))
             {
                 ModelState.AddModelError(nameof(model.Email), "Email này đã được đăng ký");
-                return View(model);
+                return InvalidResult(model);
             }
 
             var user = new TaiKhoan
@@ -187,11 +185,12 @@ namespace WorkConnect.Controllers
                 else
                     ModelState.AddModelError(string.Empty, "Không thể tạo tài khoản lúc này. Vui lòng thử lại sau");
 
-                return View(model);
+                return InvalidResult(model);
             }
 
+            // Thông báo hiển thị ở trang Đăng nhập (qua TempData) sau khi chuyển hướng
             TempData["SuccessMessage"] = "Đăng ký thành công! Vui lòng đăng nhập.";
-            return RedirectToAction(nameof(Login));
+            return RedirectOrJson(Url.Action(nameof(Login))!);
         }
 
         // ===================== QUÊN MẬT KHẨU (FORGOT PASSWORD) =====================
@@ -213,7 +212,7 @@ namespace WorkConnect.Controllers
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return InvalidResult(model);
 
             var email = NormalizeEmail(model.Email);
 
@@ -261,7 +260,7 @@ namespace WorkConnect.Controllers
             }
 
             // Luôn chuyển sang bước xác nhận OTP để không lộ email nào tồn tại
-            return RedirectToAction(nameof(VerifyOtp), new { email });
+            return RedirectOrJson(Url.Action(nameof(VerifyOtp), new { email })!);
         }
 
         // GET: /Account/VerifyOtp
@@ -281,7 +280,7 @@ namespace WorkConnect.Controllers
         public IActionResult VerifyOtp(VerifyOtpViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return InvalidResult(model);
 
             var email = NormalizeEmail(model.Email);
 
@@ -314,7 +313,7 @@ namespace WorkConnect.Controllers
                     HttpContext.Session.SetString("ResetTokenExpiry_" + email,
                         DateTime.UtcNow.Add(ResetTokenLifetime).ToString("o", CultureInfo.InvariantCulture));
 
-                    return RedirectToAction(nameof(ResetPassword), new { email, token = resetToken });
+                    return RedirectOrJson(Url.Action(nameof(ResetPassword), new { email, token = resetToken })!);
                 }
 
                 if (exhausted)
@@ -322,7 +321,7 @@ namespace WorkConnect.Controllers
             }
 
             ModelState.AddModelError(nameof(model.OtpCode), "Mã OTP không chính xác hoặc đã hết hạn.");
-            return View(model);
+            return InvalidResult(model);
         }
 
         // GET: /Account/ResetPassword
@@ -348,14 +347,14 @@ namespace WorkConnect.Controllers
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                return InvalidResult(model);
 
             var email = NormalizeEmail(model.Email);
 
             if (!IsResetTokenValid(email, model.Token))
             {
                 ModelState.AddModelError(string.Empty, "Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
-                return View(model);
+                return InvalidResult(model);
             }
 
             var user = await _context.TaiKhoans.FirstOrDefaultAsync(u => u.Email == email);
@@ -370,11 +369,11 @@ namespace WorkConnect.Controllers
                 HttpContext.Session.Remove("ResetToken_" + email);
                 HttpContext.Session.Remove("ResetTokenExpiry_" + email);
 
-                return RedirectToAction(nameof(ResetPasswordConfirmation));
+                return RedirectOrJson(Url.Action(nameof(ResetPasswordConfirmation))!);
             }
 
             ModelState.AddModelError(string.Empty, "Không tìm thấy tài khoản cần cập nhật.");
-            return View(model);
+            return InvalidResult(model);
         }
 
         // GET: /Account/ResetPasswordConfirmation
@@ -403,6 +402,27 @@ namespace WorkConnect.Controllers
         }
 
         // ===================== HELPERS =====================
+        private IActionResult InvalidResult(object model)
+        {
+            if (!Request.IsAjaxRequest())
+                return View(model);
+
+            var errors = ModelState
+                .Where(kv => kv.Value != null && kv.Value.Errors.Count > 0)
+                .SelectMany(kv => kv.Value!.Errors.Select(e => new
+                {
+                    field = kv.Key,
+                    message = string.IsNullOrWhiteSpace(e.ErrorMessage) ? "Dữ liệu không hợp lệ" : e.ErrorMessage
+                }))
+                .ToList();
+
+            return BadRequest(new { success = false, errors });
+        }
+
+        private IActionResult RedirectOrJson(string url)
+            => Request.IsAjaxRequest()
+                ? Json(new { success = true, redirectUrl = url })
+                : LocalRedirect(url);
 
         private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 
