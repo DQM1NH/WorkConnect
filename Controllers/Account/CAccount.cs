@@ -402,13 +402,6 @@ namespace WorkConnect.Controllers
         }
 
         // ===================== HELPERS =====================
-
-        // ----- AJAX -----
-        // Các form (Đăng nhập / Đăng ký / Quên mật khẩu / OTP / Đặt lại mật khẩu) được gửi bằng AJAX (account.js):
-        //   - dữ liệu không hợp lệ  -> 400 { success:false, errors:[{ field, message }] }  (field rỗng = lỗi chung của form)
-        //   - thành công             -> 200 { success:true, redirectUrl }
-        // Không phải AJAX (JS bị tắt) -> View / redirect như trước, nên form vẫn dùng được.
-
         private IActionResult InvalidResult(object model)
         {
             if (!Request.IsAjaxRequest())
