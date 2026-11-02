@@ -38,3 +38,8 @@
   .home-jobs, .access-box { grid-template-columns: 1fr; }
   .home-hero h1 { font-size: 22px; }
 }
+/* Thẻ việc làm mới nhất: bấm vào đâu cũng mở chi tiết */
+.job-card-link { text-decoration: none; color: inherit; cursor: pointer; transition: .15s; }
+.job-card-link:hover { border-color: #2b569a; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(43, 86, 154, .12); }
+.job-card-link .job-card-title { color: #2b569a; }
+.job-card-link:hover .job-card-title { text-decoration: none; }

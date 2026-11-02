@@ -2,7 +2,7 @@ using System.Globalization;
 
 namespace WorkConnect.Models
 {
-    /// <summary>Các kiểu sắp xếp theo BM07: Mới nhất / Lương cao nhất / Sắp hết hạn.</summary>
+
     public static class JobSort
     {
         public const string MoiNhat = "moi-nhat";
@@ -11,20 +11,19 @@ namespace WorkConnect.Models
         public static readonly string[] All = { MoiNhat, LuongCao, SapHetHan };
     }
 
-    /// <summary>Từ khóa và bộ lọc của BM07. Tất cả đều không bắt buộc.</summary>
+   
     public class JobSearchFilter
     {
-        public string? Keyword { get; set; }          // tiêu đề, vị trí hoặc tên công ty
+        public string? Keyword { get; set; }         
         public int? MaNganhNghe { get; set; }
         public int? MaDiaDiem { get; set; }
         public int? MaLoaiHinh { get; set; }
         public int? MaMucKinhNghiem { get; set; }
         public int? MaHinhThuc { get; set; }
-        public decimal? LuongTuTrieu { get; set; }    // đơn vị: triệu đồng
-        public decimal? LuongDenTrieu { get; set; }   // đơn vị: triệu đồng
+        public decimal? LuongTuTrieu { get; set; }    
+        public decimal? LuongDenTrieu { get; set; }   
         public string Sort { get; set; } = JobSort.MoiNhat;
 
-        /// <summary>Làm sạch dữ liệu đầu vào do người dùng gửi lên.</summary>
         public void Normalize()
         {
             Keyword = string.IsNullOrWhiteSpace(Keyword) ? null : Keyword.Trim();
@@ -32,22 +31,29 @@ namespace WorkConnect.Models
 
             LuongTuTrieu = ClampTrieu(LuongTuTrieu);
             LuongDenTrieu = ClampTrieu(LuongDenTrieu);
-            if (LuongTuTrieu.HasValue && LuongDenTrieu.HasValue && LuongTuTrieu > LuongDenTrieu)
-                (LuongTuTrieu, LuongDenTrieu) = (LuongDenTrieu, LuongTuTrieu);
+     
 
             if (string.IsNullOrEmpty(Sort) || !JobSort.All.Contains(Sort)) Sort = JobSort.MoiNhat;
+        }
+
+
+        public string? ValidateLuong()
+        {
+            if (LuongTuTrieu.HasValue && LuongDenTrieu.HasValue && LuongTuTrieu.Value >= LuongDenTrieu.Value)
+                return "Mức lương \"Từ\" phải nhỏ hơn mức lương \"Đến\".";
+            return null;
         }
 
         private static decimal? ClampTrieu(decimal? v)
         {
             if (!v.HasValue || v.Value < 0) return null;
-            return Math.Min(v.Value, 100000m);        // chặn số quá lớn gây tràn kiểu decimal
+            return Math.Min(v.Value, 100000m);        
         }
     }
 
     public record OptionItem(int Id, string Name);
 
-    /// <summary>Dữ liệu các ô chọn lấy từ bảng danh mục.</summary>
+  
     public class JobFilterOptions
     {
         public List<OptionItem> NganhNghes { get; set; } = new();
@@ -78,7 +84,6 @@ namespace WorkConnect.Models
         public string LuongHienThi => JobFormat.Luong(LuongToiThieu, LuongToiDa, LuongThoaThuan);
     }
 
-    /// <summary>Model của trang danh sách việc làm (lần hiển thị đầu tiên).</summary>
     public class JobSearchViewModel
     {
         public JobSearchFilter Filter { get; set; } = new();
@@ -86,7 +91,6 @@ namespace WorkConnect.Models
         public List<JobListItem> Items { get; set; } = new();
     }
 
-    /// <summary>Thông tin chi tiết tin tuyển dụng (R05).</summary>
     public class JobDetailViewModel
     {
         public string Slug { get; set; } = string.Empty;
@@ -110,7 +114,7 @@ namespace WorkConnect.Models
         public DateTime HanUngTuyen { get; set; }
         public string TrangThai { get; set; } = string.Empty;
 
-        // Thông tin doanh nghiệp (BM03)
+      
         public string TenCongTy { get; set; } = string.Empty;
         public string? DuongDanLogo { get; set; }
         public string DiaChiCongTy { get; set; } = string.Empty;
@@ -119,7 +123,7 @@ namespace WorkConnect.Models
 
         public string LuongHienThi => JobFormat.Luong(LuongToiThieu, LuongToiDa, LuongThoaThuan);
 
-        /// <summary>Tin đang tuyển và chưa quá hạn ứng tuyển.</summary>
+    
         public bool ConNhanDon => TrangThai == "Đang tuyển" && HanUngTuyen.Date >= DateTime.Today;
     }
 

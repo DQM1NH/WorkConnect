@@ -61,14 +61,14 @@ body {
 .icon-orange { background-color: #f39c12; }
 
 .feature-text h3 {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: bold;
     margin: 0 0 5px 0;
     color: #222;
 }
 
 .feature-text p {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
     margin: 0;
     line-height: 1.4;
@@ -93,7 +93,7 @@ body {
     text-decoration: none;
     color: #888;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 15px;
     position: relative;
 }
 
@@ -178,7 +178,7 @@ body {
     padding: 8px 0;
     border: none;
     border-bottom: 1px solid #ccc;
-    font-size: 13px;
+    font-size: 15px;
     outline: none;
     background: transparent;
     transition: border-color 0.2s;
@@ -207,7 +207,7 @@ body {
     align-items: flex-start;
     gap: 10px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 13px;
     color: #555;
     line-height: 1.5;
 }
@@ -258,4 +258,18 @@ body {
         border-right: none;
         border-bottom: 1px solid #eee;
     }
+}
+.register-field-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 15px;
+    font-weight: 600;
+}
+.required-asterisk {
+    color: #dc3545;
+    font-weight: 700;
+}
+.register-form h3 {
+    font-size: 18px;
 }

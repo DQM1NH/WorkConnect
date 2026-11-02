@@ -5,7 +5,7 @@ using WorkConnect.Services;
 
 namespace WorkConnect.Controllers;
 
-[Authorize(Roles = "Candidate")]
+[Authorize(Roles = AppRoles.UngVien)]
 [Route("ung-tuyen")]
 public class ApplicationController : Controller
 {

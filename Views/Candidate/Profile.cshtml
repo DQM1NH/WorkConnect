@@ -1,0 +1,135 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/candidate.css" asp-append-version="true" />
+
+<section class="cand-page">
+    <h1 class="cand-title">Hồ sơ của tôi</h1>
+    <partial name="_CandidateTabs" />
+
+    @if (!Model.DaCoHoSo)
+    {
+        <div class="job-notice">Bạn chưa có hồ sơ. Hãy điền thông tin bên dưới để có thể tải CV và ứng tuyển.</div>
+    }
+
+    <form asp-controller="Candidate" asp-action="Profile" method="post" enctype="multipart/form-data" class="cand-form">
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <p class="text-muted small">Các trường có dấu <span class="text-danger">*</span> là bắt buộc.</p>
+
+        <h2 class="cand-sub">Thông tin cá nhân</h2>
+        <div class="cand-avatar-row">
+            @if (Model.CoAnhDaiDien)
+            {
+                <img class="cand-avatar" src="@Url.Action("Avatar", "Candidate")?v=@DateTime.Now.Ticks" alt="Ảnh đại diện" />
+            }
+            else
+            {
+                <div class="cand-avatar cand-avatar-empty"><i class="fa-regular fa-user"></i></div>
+            }
+            <div class="job-field flex-grow-1">
+                <label for="avatar">Ảnh đại diện (JPG/PNG, tối đa 2 MB)</label>
+                <input id="avatar" name="avatar" type="file" accept=".jpg,.jpeg,.png" class="form-control" />
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.HoTen">Họ và tên <span class="text-danger">*</span></label>
+                <input asp-for="Form.HoTen" class="form-control" maxlength="100" />
+                <span asp-validation-for="Form.HoTen" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 job-field">
+                <label asp-for="Form.NgaySinh">Ngày sinh <span class="text-danger">*</span></label>
+                <input asp-for="Form.NgaySinh" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="Form.NgaySinh" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 job-field">
+                <label asp-for="Form.GioiTinh">Giới tính</label>
+                <select asp-for="Form.GioiTinh" class="form-select">
+                    <option value="">-- Không chọn --</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+                <span asp-validation-for="Form.GioiTinh" class="text-danger"></span>
+            </div>
+            <div class="col-md-5 job-field">
+                <label asp-for="Form.EmailLienHe">Email liên hệ <span class="text-danger">*</span></label>
+                <input asp-for="Form.EmailLienHe" type="email" class="form-control" maxlength="150" />
+                <span asp-validation-for="Form.EmailLienHe" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 job-field">
+                <label asp-for="Form.SoDienThoaiLienHe">Số điện thoại <span class="text-danger">*</span></label>
+                <input asp-for="Form.SoDienThoaiLienHe" class="form-control" maxlength="10" inputmode="numeric" />
+                <span asp-validation-for="Form.SoDienThoaiLienHe" class="text-danger"></span>
+            </div>
+            <div class="col-md-3 job-field">
+                <label asp-for="Form.MaDiaDiem">Tỉnh/Thành phố</label>
+                <select asp-for="Form.MaDiaDiem" asp-items="@(new SelectList(Model.Options.DiaDiems, "Id", "Name"))" class="form-select">
+                    <option value="">-- Chọn --</option>
+                </select>
+                <span asp-validation-for="Form.MaDiaDiem" class="text-danger"></span>
+            </div>
+        </div>
+
+        <h2 class="cand-sub">Học vấn</h2>
+        <div class="row g-3">
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.Truong">Trường đang học / đã tốt nghiệp <span class="text-danger">*</span></label>
+                <input asp-for="Form.Truong" class="form-control" maxlength="200" />
+                <span asp-validation-for="Form.Truong" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.ChuyenNganh">Chuyên ngành <span class="text-danger">*</span></label>
+                <input asp-for="Form.ChuyenNganh" class="form-control" maxlength="100" />
+                <span asp-validation-for="Form.ChuyenNganh" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.MaTrinhDo">Trình độ học vấn <span class="text-danger">*</span></label>
+                <select asp-for="Form.MaTrinhDo" asp-items="@(new SelectList(Model.Options.TrinhDos, "Id", "Name"))" class="form-select">
+                    <option value="">-- Chọn --</option>
+                </select>
+                <span asp-validation-for="Form.MaTrinhDo" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.NamTotNghiep">Năm tốt nghiệp (thực tế hoặc dự kiến)</label>
+                <input asp-for="Form.NamTotNghiep" type="number" min="1990" max="@(DateTime.Today.Year + 10)" class="form-control" />
+                <span asp-validation-for="Form.NamTotNghiep" class="text-danger"></span>
+            </div>
+        </div>
+
+        <h2 class="cand-sub">Năng lực</h2>
+        <div class="job-field">
+            <label asp-for="Form.KyNang">Kỹ năng (cách nhau bằng dấu phẩy) <span class="text-danger">*</span></label>
+            <textarea asp-for="Form.KyNang" class="form-control" rows="2" maxlength="2000" placeholder="C#, ASP.NET Core, SQL Server, Giao tiếp"></textarea>
+            <span asp-validation-for="Form.KyNang" class="text-danger"></span>
+        </div>
+        <div class="job-field">
+            <label asp-for="Form.KinhNghiem">Kinh nghiệm / Dự án đã tham gia</label>
+            <textarea asp-for="Form.KinhNghiem" class="form-control" rows="4" maxlength="4000"></textarea>
+            <span asp-validation-for="Form.KinhNghiem" class="text-danger"></span>
+        </div>
+        <div class="job-field">
+            <label asp-for="Form.ChungChi">Chứng chỉ (tên, đơn vị cấp, năm cấp)</label>
+            <input asp-for="Form.ChungChi" class="form-control" maxlength="1000" />
+            <span asp-validation-for="Form.ChungChi" class="text-danger"></span>
+        </div>
+        <div class="job-field">
+            <label asp-for="Form.MucTieuNgheNghiep">Mục tiêu nghề nghiệp</label>
+            <textarea asp-for="Form.MucTieuNgheNghiep" class="form-control" rows="3" maxlength="1000"></textarea>
+            <span asp-validation-for="Form.MucTieuNgheNghiep" class="text-danger"></span>
+        </div>
+
+        <div class="job-filter-actions">
+            <button type="submit" class="btn-job-search"><i class="fa-solid fa-floppy-disk"></i> Lưu hồ sơ</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

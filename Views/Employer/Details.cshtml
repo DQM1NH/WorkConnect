@@ -1,0 +1,37 @@
+
+@model WorkConnect.Models.Entities.NhaTuyenDung
+
+@{
+    ViewData["Title"] = "Chi tiết nhà tuyển dụng";
+}
+
+<div class="container mt-4">
+    <h2>Thông tin nhà tuyển dụng</h2>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Tên công ty</dt>
+        <dd class="col-sm-9">@Model.TenCongTy</dd>
+
+        <dt class="col-sm-3">Email liên hệ</dt>
+        <dd class="col-sm-9">@Model.EmailLienHe</dd>
+
+        <dt class="col-sm-3">Số điện thoại</dt>
+        <dd class="col-sm-9">@Model.SoDienThoaiLienHe</dd>
+
+        <dt class="col-sm-3">Địa chỉ</dt>
+        <dd class="col-sm-9">@Model.DiaChi</dd>
+
+        <dt class="col-sm-3">Website</dt>
+        <dd class="col-sm-9">@Model.Website</dd>
+
+        <dt class="col-sm-3">Giới thiệu</dt>
+        <dd class="col-sm-9">@Model.GioiThieu</dd>
+    </dl>
+
+    <a asp-controller="Employer"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Quay lại danh sách
+    </a>
+</div>

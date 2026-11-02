@@ -15,11 +15,9 @@ else
     <div class="job-list">
         @foreach (var j in Model)
         {
-            <article class="job-card">
+            <a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien" class="job-card job-card-link">
                 <div class="job-card-main">
-                    <h2 class="job-card-title">
-                        <a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien">@j.TieuDe</a>
-                    </h2>
+                    <h2 class="job-card-title">@j.TieuDe</h2>
                     <p class="job-card-company">@j.TenCongTy · @j.ViTri</p>
                     <ul class="job-tags">
                         <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
@@ -36,7 +34,7 @@ else
                     <div class="job-salary-text">@j.LuongHienThi</div>
                     <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
                 </div>
-            </article>
+            </a>
         }
     </div>
 }

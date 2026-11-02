@@ -1,0 +1,8 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+<ul class="nav nav-tabs cand-tabs">
+    <li class="nav-item"><a class="nav-link @(action == "Profile" ? "active" : "")" asp-controller="Candidate" asp-action="Profile">Hồ sơ cá nhân</a></li>
+    <li class="nav-item"><a class="nav-link @(action == "Cv" ? "active" : "")" asp-controller="Candidate" asp-action="Cv">CV của tôi</a></li>
+    <li class="nav-item"><a class="nav-link @(action == "Applications" ? "active" : "")" asp-controller="Candidate" asp-action="Applications">Đơn ứng tuyển</a></li>
+</ul>

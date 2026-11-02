@@ -3,8 +3,8 @@
     ViewData["Title"] = "Trang chủ";
     ViewData["Description"] = "WorkConnect - sàn việc làm, thực tập, bán thời gian dành cho sinh viên và người mới tốt nghiệp.";
 }
-<link rel="stylesheet" href="~/css/job.css"/>
-<link rel="stylesheet" href="~/css/home.css"/>
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
 
 <section class="home-hero">
@@ -51,25 +51,26 @@
         <a asp-controller="Job" asp-action="Index">Xem tất cả →</a>
     </div>
     <div class="home-jobs">
-        @foreach (var j in Model.Latest)
-        {
-            <article class="job-card">
-                <div class="job-logo">@j.TenCongTy.Substring(0, 1)</div>
-                <div class="job-card-main">
-                    <h3 class="job-card-title"><a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien">@j.TieuDe</a></h3>
-                    <p class="job-card-company">@j.TenCongTy</p>
-                    <ul class="job-tags">
-                        <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
-                        <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
-                    </ul>
-                </div>
-                <div class="job-card-side">
-                    <div class="job-salary-text">@j.LuongHienThi</div>
-                    <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
-                </div>
-            </article>
-        }
-    </div>
+      
+    @foreach (var j in Model.Latest)
+    {
+        <a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien" class="job-card job-card-link">
+            <div class="job-logo">@j.TenCongTy.Substring(0, 1)</div>
+            <div class="job-card-main">
+                <h3 class="job-card-title">@j.TieuDe</h3>
+                <p class="job-card-company">@j.TenCongTy</p>
+                <ul class="job-tags">
+                    <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
+                    <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
+                </ul>
+            </div>
+            <div class="job-card-side">
+                <div class="job-salary-text">@j.LuongHienThi</div>
+                <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
+            </div>
+        </a>
+    }
+</div>
 </section>
 
 <section class="home-section">

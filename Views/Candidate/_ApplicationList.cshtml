@@ -1,0 +1,57 @@
+@model ApplicationsViewModel
+
+<p class="job-count">Bạn có <strong>@Model.Items.Count</strong> đơn ứng tuyển</p>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="job-empty">
+        <i class="fa-regular fa-paper-plane"></i>
+        <p>Chưa có đơn ứng tuyển nào</p>
+        <a asp-controller="Job" asp-action="Index" class="btn-job-search">Tìm việc làm</a>
+    </div>
+}
+else
+{
+    <div class="job-list">
+        @foreach (var a in Model.Items)
+        {
+            <article class="job-card cand-app">
+                <div class="job-card-main">
+                    <h2 class="job-card-title"><a class="job-card-stretched" asp-controller="Job" asp-action="Details" asp-route-slug="@a.Slug">@a.TieuDe</a></h2>
+                    <p class="job-card-company">@a.TenCongTy</p>
+                    <ul class="job-tags">
+                        <li><i class="fa-regular fa-calendar"></i> Nộp ngày @a.NgayNop.ToString("dd/MM/yyyy HH:mm")</li>
+                        <li><i class="fa-regular fa-file-lines"></i> CV: @a.TenCV</li>
+                    </ul>
+
+                    <details class="cand-history">
+                        <summary>Lịch sử xử lý (@a.LichSu.Count)</summary>
+                        <ol>
+                            @foreach (var h in a.LichSu)
+                            {
+                                <li>
+                                    <strong>@h.TenTrangThai</strong> <small class="text-muted">@h.NgayCapNhat.ToString("dd/MM/yyyy HH:mm")</small>
+                                    @if (h.ThoiGianPhongVan.HasValue)
+                                    {
+                                        <div><i class="fa-regular fa-clock"></i> Phỏng vấn: @h.ThoiGianPhongVan.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(h.DiaDiemPhongVan))
+                                    {
+                                        <div><i class="fa-solid fa-location-dot"></i> @h.DiaDiemPhongVan</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(h.PhanHoiUngVien))
+                                    {
+                                        <div class="cand-feedback">Phản hồi: @h.PhanHoiUngVien</div>
+                                    }
+                                </li>
+                            }
+                        </ol>
+                    </details>
+                </div>
+                <div class="job-card-side">
+                    <span class="cand-badge st-@a.MaTrangThai">@a.TenTrangThai</span>
+                </div>
+            </article>
+        }
+    </div>
+}

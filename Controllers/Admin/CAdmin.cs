@@ -83,9 +83,9 @@ namespace WorkConnect.Controllers
                 select new
                 {
                     d.MaDon,
-                    u.HoTen,
-                    u.Email,
-                    u.SoDienThoai,
+                    d.HoTen,
+                    d.Email,
+                    d.SoDienThoai,
                     t.TieuDe,
                     TenCongTy = e != null ? e.TenCongTy : null,
                     d.NgayNop
