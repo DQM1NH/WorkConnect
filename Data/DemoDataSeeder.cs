@@ -13,7 +13,7 @@ public static class DemoDataSeeder
         TaiKhoan NewUser(int role, string email, string name, string phone)
         {
             var u = new TaiKhoan { MaVaiTro = role, Email = email, HoTen = name, SoDienThoai = phone };
-            u.MatKhauMaHoa = hasher.HashPassword(u, "Demo@1234");
+            u.MatKhauHash = hasher.HashPassword(u, "Demo@1234");
             return u;
         }
 

@@ -824,10 +824,8 @@ namespace WorkConnect.Controllers
             {
                 MaDon = don.MaDon,
                 MaTrangThai = maTrangThai,
-                ThoiGianPhongVan =
-                    maTrangThai == 3 ? thoiGianPhongVan : null,
-                DiaDiemPhongVan =
-                    maTrangThai == 3 ? diaDiemPhongVan : null,
+                ThoiGianPhongVan = maTrangThai == 3 ? thoiGianPhongVan : null,
+                DiaDiemPhongVan = maTrangThai == 3 ? diaDiemPhongVan : null,
                 GhiChuNoiBo = ghiChuNoiBo,
                 PhanHoiUngVien = phanHoiUngVien,
                 NgayCapNhat = DateTime.Now

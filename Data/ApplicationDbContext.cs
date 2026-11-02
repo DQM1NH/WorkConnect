@@ -79,7 +79,7 @@ public class ApplicationDbContext : DbContext
             e.ToTable("TaiKhoan", t => t.HasCheckConstraint("CK_TaiKhoan_SoDienThoai", string.Format(PhoneRule, "[SoDienThoai]")));
             e.Property(x => x.Email).HasMaxLength(150).IsRequired();
             e.HasIndex(x => x.Email).IsUnique();
-            e.Property(x => x.MatKhauMaHoa).HasMaxLength(255).IsRequired();
+            e.Property(x => x.MatKhauHash).HasMaxLength(255).IsRequired();
             e.Property(x => x.HoTen).HasMaxLength(100).IsRequired();
             e.Property(x => x.SoDienThoai).HasColumnType("varchar(10)").IsRequired();
             e.Property(x => x.BiKhoa).HasDefaultValue(false);
