@@ -7,10 +7,13 @@ namespace WorkConnect.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly IJobService _jobs;
-    public HomeController(IJobService jobs) => _jobs = jobs;
+    private readonly IJobService _jobService;
+    public HomeController(IJobService jobService)
+    {
+        _jobService = jobService;
+    }
 
-    public async Task<IActionResult> Index() => View(await _jobs.GetHomeAsync());
+    public async Task<IActionResult> Index() => View(await _jobService.GetHomeAsync());
 
     public IActionResult Privacy() => View();
 

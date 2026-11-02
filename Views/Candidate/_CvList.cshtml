@@ -1,0 +1,42 @@
+@model CvPageViewModel
+
+@if (!Model.DaCoHoSo)
+{
+    <div class="job-notice">Bạn cần <a asp-controller="Candidate" asp-action="Profile">hoàn thiện hồ sơ</a> trước khi tải CV.</div>
+}
+else if (Model.Cvs.Count == 0)
+{
+    <div class="job-empty">
+        <i class="fa-regular fa-file-lines"></i>
+        <p>Bạn chưa có CV nào</p>
+        <small>Hãy tải CV (PDF hoặc DOCX) lên để dùng khi ứng tuyển.</small>
+    </div>
+}
+else
+{
+    <div class="cand-cv-list">
+        @foreach (var cv in Model.Cvs)
+        {
+            <div class="cand-cv-item">
+                <div class="cand-cv-name">
+                    <i class="fa-solid @(cv.TenTep.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) ? "fa-file-pdf" : "fa-file-word")"></i>
+                    <a asp-controller="Candidate" asp-action="DownloadCv" asp-route-maCv="@cv.MaCV">@cv.TenTep</a>
+                    <small class="text-muted">@cv.DungLuongKB KB · @cv.NgayTaiLen.ToString("dd/MM/yyyy HH:mm")</small>
+                </div>
+                <div>
+                    @if (cv.DaDungUngTuyen)
+                    {
+                        <span class="cand-badge st-used" title="CV đã gắn với đơn ứng tuyển nên không thể xóa">Đã dùng ứng tuyển</span>
+                    }
+                    else
+                    {
+                        <button type="button" class="cand-btn-danger js-cv-delete"
+                                data-url="@Url.Action("DeleteCv", "Candidate", new { maCv = cv.MaCV })">
+                            <i class="fa-regular fa-trash-can"></i> Xóa
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

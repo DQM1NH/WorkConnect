@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using WorkConnect.Data;
 using WorkConnect.Models;
 
 namespace WorkConnect.Services;
@@ -17,9 +16,9 @@ public class JobService : IJobService
     private const string DangTuyen = "Đang tuyển";
     private const string BanNhap = "Bản nháp";
 
-    private readonly ApplicationDbContext _db;
+    private readonly WorkConnectDbContext  _db;
 
-    public JobService(ApplicationDbContext db) => _db = db;
+    public JobService(WorkConnectDbContext db) => _db = db;
 
     public async Task<JobFilterOptions> GetFilterOptionsAsync()
     {
@@ -153,34 +152,18 @@ public async Task<HomeViewModel> GetHomeAsync()
     var open = _db.TinTuyenDungs.AsNoTracking()
         .Where(t => t.TrangThai == DangTuyen && t.HanUngTuyen >= today);
 
-    // Ngành nghề: đếm theo mã, sau đó ghép tên từ bảng danh mục
-    var nganhNames = await _db.NganhNghes.AsNoTracking()
-        .ToDictionaryAsync(x => x.MaNganhNghe, x => x.TenNganhNghe);
-    var catCounts = await open
-        .GroupBy(t => t.MaNganhNghe)
-        .Select(g => new { Id = g.Key, Count = g.Count() })
-        .ToListAsync();
-    var categories = catCounts
-        .Where(c => nganhNames.ContainsKey(c.Id))
-        .Select(c => new CategoryCount(c.Id, nganhNames[c.Id], c.Count))
+    var cats = await open
+        .GroupBy(t => new { t.MaNganhNghe, t.NganhNghe!.TenNganhNghe })
+        .Select(g => new { g.Key.MaNganhNghe, g.Key.TenNganhNghe, Count = g.Count() })
         .OrderByDescending(c => c.Count)
-        .ToList();
+        .ToListAsync();
 
-    // Nhà tuyển dụng: đếm theo mã, lấy top 8, sau đó ghép tên và logo
-    var empCounts = await open
-        .GroupBy(t => t.MaNhaTuyenDung)
-        .Select(g => new { Id = g.Key, Count = g.Count() })
-        .OrderByDescending(x => x.Count)
+    var emps = await open
+        .GroupBy(t => new { t.MaNhaTuyenDung, t.NhaTuyenDung!.TenCongTy, t.NhaTuyenDung!.DuongDanLogo })
+        .Select(g => new { g.Key.MaNhaTuyenDung, g.Key.TenCongTy, g.Key.DuongDanLogo, Count = g.Count() })
+        .OrderByDescending(e => e.Count)
         .Take(8)
         .ToListAsync();
-    var empIds = empCounts.Select(x => x.Id).ToList();
-    var empMap = await _db.NhaTuyenDungs.AsNoTracking()
-        .Where(e => empIds.Contains(e.MaNhaTuyenDung))
-        .ToDictionaryAsync(e => e.MaNhaTuyenDung);
-    var employers = empCounts
-        .Where(x => empMap.ContainsKey(x.Id))
-        .Select(x => new EmployerCard(x.Id, empMap[x.Id].TenCongTy, empMap[x.Id].DuongDanLogo, x.Count))
-        .ToList();
 
     return new HomeViewModel
     {
@@ -188,8 +171,8 @@ public async Task<HomeViewModel> GetHomeAsync()
         Latest = await SearchAsync(new JobSearchFilter(), 8),
         TotalJobs = await open.CountAsync(),
         TotalEmployers = await _db.NhaTuyenDungs.CountAsync(),
-        Categories = categories,
-        Employers = employers
+        Categories = cats.Select(c => new CategoryCount(c.MaNganhNghe, c.TenNganhNghe, c.Count)).ToList(),
+        Employers = emps.Select(e => new EmployerCard(e.MaNhaTuyenDung, e.TenCongTy, e.DuongDanLogo, e.Count)).ToList()
     };
 }
 }

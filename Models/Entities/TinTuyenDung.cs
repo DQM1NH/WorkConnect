@@ -32,19 +32,34 @@ namespace WorkConnect.Models.Entities
 
         public string MoTaCongViec { get; set; }
         public string YeuCauCongViec { get; set; }
+        public string YeuCauUngVien { get; set; } = string.Empty;
+        public string? QuyenLoi { get; set; }
         public DateTime NgayDang { get; set; }
         public DateTime HanUngTuyen { get; set; }
         public string TrangThai { get; set; }
         public bool BiAn { get; set; } 
 
+
         // Navigation Properties (Quan hệ khóa ngoại)
         [ForeignKey("MaNhaTuyenDung")]
         public virtual NhaTuyenDung NhaTuyenDung { get; set; }
+
 
         [ForeignKey("MaNganhNghe")]
         public virtual NganhNghe NganhNghe { get; set; }
 
         [ForeignKey("MaDiaDiem")]
         public virtual DiaDiem DiaDiem { get; set; }
+
+        [ForeignKey("MaLoaiHinh")]
+        public virtual LoaiHinhCongViec LoaiHinh { get; set; }
+
+        [ForeignKey("MaHinhThuc")]
+        public virtual HinhThucLamViec HinhThuc { get; set; }
+
+         [ForeignKey("MaMucKinhNghiem")]
+        public virtual MucKinhNghiem MucKinhNghiem { get; set; }
+
+        public ICollection<DonUngTuyen> DonUngTuyens { get; set; } = new List<DonUngTuyen>();
     }
 }

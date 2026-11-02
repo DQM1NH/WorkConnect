@@ -1,0 +1,74 @@
+@model ApplyViewModel
+@{
+    ViewData["Title"] = $"Ứng tuyển - {Model.TieuDe}";
+}
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/candidate.css" asp-append-version="true" />
+
+<section class="cand-page">
+    <p><a asp-controller="Job" asp-action="Details" asp-route-slug="@Model.Slug" class="job-back">← Quay lại tin tuyển dụng</a></p>
+    <h1 class="cand-title">Ứng tuyển: @Model.TieuDe</h1>
+    <p class="job-card-company">@Model.TenCongTy · Hạn nộp @Model.HanUngTuyen.ToString("dd/MM/yyyy")</p>
+
+    <form asp-controller="Application" asp-action="Apply" asp-route-slug="@Model.Slug" method="post"
+          enctype="multipart/form-data" class="cand-form">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <h2 class="cand-sub">Thông tin liên hệ</h2>
+        <div class="row g-3">
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.HoTen">Họ và tên <span class="text-danger">*</span></label>
+                <input asp-for="Form.HoTen" class="form-control" maxlength="100" />
+                <span asp-validation-for="Form.HoTen" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.Email">Email <span class="text-danger">*</span></label>
+                <input asp-for="Form.Email" type="email" class="form-control" maxlength="150" />
+                <span asp-validation-for="Form.Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 job-field">
+                <label asp-for="Form.SoDienThoai">Số điện thoại <span class="text-danger">*</span></label>
+                <input asp-for="Form.SoDienThoai" class="form-control" maxlength="10" inputmode="numeric" />
+                <span asp-validation-for="Form.SoDienThoai" class="text-danger"></span>
+            </div>
+        </div>
+
+        <h2 class="cand-sub">CV ứng tuyển <span class="text-danger">*</span></h2>
+        @if (Model.Cvs.Count > 0)
+        {
+            <div class="cand-cv-pick">
+                @foreach (var cv in Model.Cvs)
+                {
+                    <label class="cand-radio">
+                        <input type="radio" asp-for="Form.MaCV" value="@cv.MaCV" />
+                        <span>@cv.TenTep <small class="text-muted">(@cv.DungLuongKB KB · @cv.NgayTaiLen.ToString("dd/MM/yyyy"))</small></span>
+                    </label>
+                }
+            </div>
+            <p class="text-muted small mt-2">Hoặc tải CV mới bên dưới (nếu chọn tệp, hệ thống sẽ dùng tệp này thay cho CV đã chọn).</p>
+        }
+        else
+        {
+            <div class="job-notice">Bạn chưa có CV nào. Hãy tải CV lên để ứng tuyển.</div>
+        }
+        <input type="file" name="newCv" accept=".pdf,.docx" class="form-control cand-file" />
+        <small class="text-muted">PDF hoặc DOCX, tối đa 5 MB.</small>
+
+        <h2 class="cand-sub">Thư giới thiệu</h2>
+        <div class="job-field">
+            <textarea asp-for="Form.ThuGioiThieu" class="form-control" rows="5" maxlength="2000"
+                      placeholder="Giới thiệu ngắn gọn về bản thân và lý do bạn phù hợp với vị trí này"></textarea>
+            <span asp-validation-for="Form.ThuGioiThieu" class="text-danger"></span>
+        </div>
+
+        <div class="job-filter-actions">
+            <button type="submit" class="btn-job-search"><i class="fa-solid fa-paper-plane"></i> Gửi đơn ứng tuyển</button>
+            <a asp-controller="Job" asp-action="Details" asp-route-slug="@Model.Slug" class="btn-job-reset">Hủy</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

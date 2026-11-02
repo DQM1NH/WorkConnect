@@ -34,5 +34,19 @@ namespace WorkConnect.Models
 
         [MustBeTrue(ErrorMessage = "Bạn cần đồng ý với điều khoản sử dụng")]
         public bool AgreeTerms { get; set; }
+
+        // Vai trò đăng ký: Candidate hoặc Employer.
+        [Required(ErrorMessage = "Vui lòng chọn loại tài khoản")]
+        public string Role { get; set; } = "Candidate";
+
+        // Thông tin công ty: bắt buộc kiểm tra trong controller
+        // khi Role = Employer.
+        public string? TenCongTy { get; set; }
+        public string? DiaChiCongTy { get; set; }
+        public string? SoDienThoaiCongTy { get; set; }
+        public string? WebsiteCongTy { get; set; }
+        public int? MaNganhNghe { get; set; }
+        public int? MaQuyMo { get; set; }
+        public string? GioiThieuCongTy { get; set; }
     }
 }

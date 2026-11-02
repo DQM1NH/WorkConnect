@@ -5,6 +5,7 @@
 }
 <link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
 
 <section class="home-hero">
     <h1>Tìm việc làm, thực tập dành cho sinh viên</h1>
@@ -50,25 +51,26 @@
         <a asp-controller="Job" asp-action="Index">Xem tất cả →</a>
     </div>
     <div class="home-jobs">
-        @foreach (var j in Model.Latest)
-        {
-            <article class="job-card">
-                <div class="job-logo">@j.TenCongTy.Substring(0, 1)</div>
-                <div class="job-card-main">
-                    <h3 class="job-card-title"><a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien">@j.TieuDe</a></h3>
-                    <p class="job-card-company">@j.TenCongTy</p>
-                    <ul class="job-tags">
-                        <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
-                        <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
-                    </ul>
-                </div>
-                <div class="job-card-side">
-                    <div class="job-salary-text">@j.LuongHienThi</div>
-                    <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
-                </div>
-            </article>
-        }
-    </div>
+      
+    @foreach (var j in Model.Latest)
+    {
+        <a asp-controller="Job" asp-action="Details" asp-route-slug="@j.DuongDanThanThien" class="job-card job-card-link">
+            <div class="job-logo">@j.TenCongTy.Substring(0, 1)</div>
+            <div class="job-card-main">
+                <h3 class="job-card-title">@j.TieuDe</h3>
+                <p class="job-card-company">@j.TenCongTy</p>
+                <ul class="job-tags">
+                    <li><i class="fa-solid fa-location-dot"></i> @j.DiaDiem</li>
+                    <li><i class="fa-solid fa-briefcase"></i> @j.LoaiHinh</li>
+                </ul>
+            </div>
+            <div class="job-card-side">
+                <div class="job-salary-text">@j.LuongHienThi</div>
+                <div class="job-deadline">Hạn nộp: @j.HanUngTuyen.ToString("dd/MM/yyyy")</div>
+            </div>
+        </a>
+    }
+</div>
 </section>
 
 <section class="home-section">
@@ -80,30 +82,6 @@
                 <div class="job-logo">@e.Name.Substring(0, 1)</div>
                 <strong>@e.Name</strong><span>@e.JobCount việc làm</span>
             </a>
-        }
-    </div>
-</section>
-
-<section class="home-section access-box">
-    <div>
-        <h3><i class="fa-solid fa-globe"></i> Không cần đăng nhập</h3>
-        <ul>
-            <li>Tìm kiếm và lọc việc làm</li>
-            <li>Xem chi tiết tin tuyển dụng</li>
-            <li>Xem thông tin doanh nghiệp</li>
-        </ul>
-    </div>
-    <div>
-        <h3><i class="fa-solid fa-lock"></i> Cần đăng nhập (ứng viên)</h3>
-        <ul>
-            <li>Tạo và cập nhật hồ sơ, tải CV</li>
-            <li>Ứng tuyển trực tuyến</li>
-            <li>Theo dõi trạng thái đơn ứng tuyển</li>
-        </ul>
-        @if (User.Identity?.IsAuthenticated != true)
-        {
-            <a asp-controller="Account" asp-action="Login" class="btn-job-search">Đăng nhập</a>
-            <a asp-controller="Account" asp-action="Register" class="btn-job-reset">Tạo tài khoản</a>
         }
     </div>
 </section>

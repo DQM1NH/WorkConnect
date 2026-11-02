@@ -1,0 +1,42 @@
+@model CvPageViewModel
+@{
+    ViewData["Title"] = "CV của tôi";
+}
+<link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/candidate.css" asp-append-version="true" />
+
+<section class="cand-page">
+    <h1 class="cand-title">CV của tôi</h1>
+    <partial name="_CandidateTabs" />
+
+    @if (!Model.DaCoHoSo)
+    {
+        <div class="job-notice">
+            Bạn cần <a asp-controller="Candidate" asp-action="Profile">hoàn thiện hồ sơ cá nhân</a> trước khi tải CV.
+        </div>
+    }
+    else
+    {
+        <form id="cvUploadForm" asp-controller="Candidate" asp-action="UploadCv" method="post"
+              enctype="multipart/form-data" class="cand-form mb-3">
+            <div class="job-field">
+                <label for="cvFile">Tải CV mới (PDF hoặc DOCX, tối đa 5 MB)</label>
+                <input id="cvFile" name="file" type="file" accept=".pdf,.docx" class="form-control cand-file" />
+            </div>
+            <div class="job-filter-actions">
+                <button type="submit" class="btn-job-search"><i class="fa-solid fa-upload"></i> Tải lên</button>
+            </div>
+        </form>
+    }
+
+    <div id="cvMessage" class="alert d-none" role="alert"></div>
+
+    <div id="cvList" data-delete-url="@Url.Action("DeleteCv", "Candidate")">
+        <partial name="_CvList" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/candidate.js" asp-append-version="true"></script>
+}

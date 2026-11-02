@@ -1,0 +1,31 @@
+@model ApplicationsViewModel
+@{
+    ViewData["Title"] = "Đơn ứng tuyển";
+}
+<link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/candidate.css" asp-append-version="true" />
+
+<section class="cand-page">
+    <h1 class="cand-title">Đơn ứng tuyển</h1>
+    <partial name="_CandidateTabs" model='"apps"' />
+
+    <form method="get" asp-controller="Candidate" asp-action="Applications" class="cand-filter">
+        <label for="appStatus">Trạng thái:</label>
+        <select id="appStatus" name="status" class="form-select" data-url="@Url.Action("Applications", "Candidate")">
+            <option value="">Tất cả</option>
+            @foreach (var s in Model.Statuses)
+            {
+                <option value="@s.Id" selected="@(Model.Status == s.Id)">@s.Name</option>
+            }
+        </select>
+        <noscript><button type="submit" class="btn-job-search">Lọc</button></noscript>
+    </form>
+
+    <div id="appResults" aria-live="polite">
+        <partial name="_ApplicationList" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/candidate.js" asp-append-version="true"></script>
+}

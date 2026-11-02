@@ -1,0 +1,103 @@
+/* Module Ứng viên - Hồ sơ / CV / Đơn ứng tuyển / Ứng tuyển (dùng chung màu với job.css) */
+.cand-page { padding: 24px 0; }
+.cand-title { font-size: 26px; font-weight: bold; color: #111; margin-bottom: 16px; }
+.cand-sub { font-size: 18px; color: #2b569a; margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+.cand-sub:first-child { margin-top: 0; }
+
+.cand-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.cand-tabs a { padding: 8px 16px; border-radius: 6px; background: #fff; border: 1px solid #e3e6ea;
+               color: #333; text-decoration: none; font-weight: 600; }
+.cand-tabs a:hover { border-color: #2b569a; color: #2b569a; }
+.cand-tabs a.active { background: #2b569a; border-color: #2b569a; color: #fff; }
+
+.cand-form { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.05); margin-bottom: 20px; }
+.cand-filter { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.cand-filter .form-select { width: auto; min-width: 180px; }
+
+.cand-alert { padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+.cand-alert[hidden] { display: none; }
+.cand-ok { background: #e8f7ee; border: 1px solid #a8e0bd; color: #17743a; }
+.cand-err { background: #fdecec; border: 1px solid #f3b4b4; color: #a12828; }
+
+/* Ảnh đại diện */
+.cand-avatar-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.cand-avatar { display: block; width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid #e3e6ea; }
+.cand-avatar[hidden] { display: none; }
+.cand-avatar-empty { display: flex; align-items: center; justify-content: center; background: #eef2f8; color: #9aa7bd; font-size: 36px; }
+.cand-avatar-empty[hidden] { display: none; }
+
+/* Chọn CV khi ứng tuyển / tải CV */
+.cand-cv-pick { display: flex; flex-direction: column; gap: 8px; }
+.cand-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.cand-file { max-width: 480px; margin-top: 8px; }
+.cand-upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.cand-upload-row .cand-file { margin-top: 0; flex: 1 1 280px; }
+
+/* Danh sách CV */
+.cand-cv-list { display: flex; flex-direction: column; gap: 10px; }
+.cand-cv-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #fff;
+                border: 1px solid #eee; border-radius: 8px; padding: 12px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+.cand-cv-item:hover { border-color: #2b569a; }
+.cand-cv-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; overflow-wrap: anywhere; }
+.cand-cv-name i { color: #2b569a; font-size: 20px; }
+.cand-cv-name a { color: #2b569a; text-decoration: none; font-weight: 600; }
+.cand-cv-name a:hover { text-decoration: underline; }
+.cand-btn-danger { background: #fff; color: #c0392b; border: 1px solid #e6b0aa; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.cand-btn-danger:hover { background: #c0392b; color: #fff; }
+
+/* Trạng thái đơn */
+.cand-badge { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.st-1 { background: #e8f0fb; color: #2b569a; }   /* Đã gửi */
+.st-2 { background: #fff4e5; color: #8a5a00; }   /* Đang xem xét */
+.st-3 { background: #efe7fb; color: #5b2fa3; }   /* Mời phỏng vấn */
+.st-4 { background: #e8f7ee; color: #17743a; }   /* Đạt */
+.st-5 { background: #fdecec; color: #a12828; }   /* Từ chối */
+.st-used { background: #f0f0f0; color: #666; }
+
+.cand-history { margin-top: 10px; font-size: 14px; }
+.cand-history summary { cursor: pointer; color: #2b569a; }
+.cand-history ol { margin: 8px 0 0; padding-left: 20px; }
+.cand-history li { margin-bottom: 8px; }
+.cand-feedback { background: #f7f8fa; border-left: 3px solid #2b569a; padding: 6px 10px; margin-top: 4px; overflow-wrap: anywhere; }
+
+@media (max-width: 767.98px) {
+    .cand-cv-item { flex-direction: column; align-items: flex-start; }
+    .cand-title { font-size: 21px; }
+}
+/* Đơn ứng tuyển: bấm vào đâu trên thẻ cũng mở chi tiết việc làm */
+.cand-app {
+    position: relative;               /* làm mốc cho vùng bấm phủ cả thẻ */
+    cursor: pointer;                  /* hiện bàn tay trên toàn thẻ */
+    transition: .15s;
+}
+.cand-app:hover {
+    border-color: #2b569a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(43, 86, 154, .12);
+}
+.cand-app:focus-within {              /* điều hướng bằng bàn phím */
+    border-color: #2b569a;
+    box-shadow: 0 0 0 3px rgba(43, 86, 154, .2);
+}
+
+/* Link tiêu đề: bỏ gạch chân mặc định, phủ vùng bấm ra cả thẻ */
+.cand-app .job-card-stretched {
+    color: #2b569a;
+    text-decoration: none;
+}
+.cand-app .job-card-stretched::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+.cand-app:hover .job-card-stretched { text-decoration: none; }
+
+/* "Lịch sử xử lý" nổi lên trên vùng link nên vẫn bấm mở/đóng được */
+.cand-app .cand-history {
+    position: relative;
+    z-index: 2;
+    width: fit-content;
+    cursor: default;
+}
+.cand-app .cand-history summary { cursor: pointer; }

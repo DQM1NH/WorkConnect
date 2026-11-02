@@ -12,6 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Đăng ký Email Service
 builder.Services.AddTransient<IEmailService, EmailService>();
 
+// Đăng ký JobService
+builder.Services.AddScoped<IJobService, JobService>();
+
+// Đăng ký JobService
+builder.Services.AddScoped<IJobService, JobService>();
+
+// Đăng ký CandidateService và ApplicationService
+builder.Services.AddScoped<ICandidateService, CandidateService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+
 // Cấu hình DbContext
 builder.Services.AddDbContext<WorkConnectDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

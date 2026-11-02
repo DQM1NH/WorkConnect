@@ -46,14 +46,3 @@ public class QuyMoCongTy
     public string TenQuyMo { get; set; } = string.Empty;
 }
 
-public class NganhNghe
-{
-    [Key] public int MaNganhNghe { get; set; }
-    public string TenNganhNghe { get; set; } = string.Empty;
-}
-
-public class DiaDiem
-{
-    [Key] public int MaDiaDiem { get; set; }
-    public string TenDiaDiem { get; set; } = string.Empty;
-}

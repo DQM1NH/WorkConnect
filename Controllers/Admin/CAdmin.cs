@@ -83,9 +83,9 @@ namespace WorkConnect.Controllers
                 select new
                 {
                     d.MaDon,
-                    u.HoTen,
-                    u.Email,
-                    u.SoDienThoai,
+                    d.HoTen,
+                    d.Email,
+                    d.SoDienThoai,
                     t.TieuDe,
                     TenCongTy = e != null ? e.TenCongTy : null,
                     d.NgayNop
@@ -283,10 +283,19 @@ namespace WorkConnect.Controllers
                 return RedirectBack(returnUrl);
             }
 
-            _context.TinTuyenDungs.Remove(job);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.TinTuyenDungs.Remove(job);
+                await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Xóa bài đăng thành công.";
+                TempData["Success"] = "Xóa bài đăng thành công.";
+            }
+            catch (DbUpdateException)
+            {
+                // Còn dữ liệu liên quan chặn việc xóa -> gợi ý ẩn bài đăng thay vì để lỗi 500
+                _context.ChangeTracker.Clear();
+                TempData["Error"] = "Không thể xóa bài đăng vì còn dữ liệu liên quan (đơn ứng tuyển...). Hãy dùng chức năng Ẩn thay thế.";
+            }
 
             return RedirectBack(returnUrl);
         }

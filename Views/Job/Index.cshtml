@@ -5,6 +5,7 @@
     ViewData["Description"] = "Tìm kiếm và lọc việc làm, thực tập, bán thời gian cho sinh viên và người mới tốt nghiệp trên WorkConnect.";
     var f = Model.Filter;
     var inv = CultureInfo.InvariantCulture;
+    var salaryError = ViewData.ModelState["LuongDenTrieu"]?.Errors.FirstOrDefault()?.ErrorMessage;
 }
 
 <link rel="stylesheet" href="~/css/fontawesome-free-6.6.0-web/css/all.min.css" />
@@ -58,6 +59,7 @@
                                placeholder="Đến" aria-label="Lương tối đa"
                                value="@(f.LuongDenTrieu?.ToString("0.##", inv))" />
                     </div>
+                    <div id="salaryError" class="text-danger small mt-1" role="alert" @(salaryError == null ? "hidden" : "")>@salaryError</div>
                 </div>
 
                 <div class="job-field">
@@ -113,7 +115,10 @@
         <div class="col-12 col-lg-9">
             <div id="jobLoading" class="job-loading" hidden>Đang tải kết quả...</div>
             <div id="jobResults" aria-live="polite">
-                <partial name="_JobList" model="Model.Items" />
+                @if (salaryError == null)
+                {
+                    <partial name="_JobList" model="Model.Items" />
+                }
             </div>
         </div>
     </div>

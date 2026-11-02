@@ -12,32 +12,46 @@
 <link rel="stylesheet" href="~/css/job.css" asp-append-version="true" />
 
 <section class="job-page">
+    @if (TempData["Error"] is string err) { <div class="job-notice">@err</div> }
     <p><a asp-controller="Job" asp-action="Index" class="job-back">← Quay lại danh sách việc làm</a></p>
 
     <div class="row g-4">
         <div class="col-12 col-lg-8">
             <article class="job-detail">
+                <header class="job-head">
                 <h1 class="job-detail-title">@Model.TieuDe</h1>
-                <p class="job-card-company">@Model.TenCongTy · @Model.ViTri</p>
+                <p class="job-head-company">
+                    <i class="fa-regular fa-building"></i> @Model.TenCongTy
+                    <span class="job-head-dot">·</span> @Model.ViTri
+                </p>
 
                 @if (!Model.ConNhanDon)
                 {
                     <div class="job-notice">Tin tuyển dụng này đã đóng hoặc đã hết hạn ứng tuyển.</div>
                 }
+            </header>
 
-                <h2>Mô tả công việc</h2>
-                <div class="job-text">@Model.MoTaCongViec</div>
+                <section class="job-block">
+                    <h2><i class="fa-solid fa-clipboard-list"></i> Mô tả công việc</h2>
+                    <div class="job-text">@Model.MoTaCongViec</div>
+                </section>
 
-                <h2>Yêu cầu công việc</h2>
-                <div class="job-text">@Model.YeuCauCongViec</div>
+                <section class="job-block">
+                    <h2><i class="fa-solid fa-list-check"></i> Yêu cầu công việc</h2>
+                    <div class="job-text">@Model.YeuCauCongViec</div>
+                </section>
 
-                <h2>Yêu cầu ứng viên</h2>
-                <div class="job-text">@Model.YeuCauUngVien</div>
+                <section class="job-block">
+                    <h2><i class="fa-solid fa-user-check"></i> Yêu cầu ứng viên</h2>
+                    <div class="job-text">@Model.YeuCauUngVien</div>
+                </section>
 
                 @if (!string.IsNullOrWhiteSpace(Model.QuyenLoi))
                 {
-                    <h2>Quyền lợi</h2>
-                    <div class="job-text">@Model.QuyenLoi</div>
+                    <section class="job-block">
+                        <h2><i class="fa-solid fa-gift"></i> Quyền lợi</h2>
+                        <div class="job-text">@Model.QuyenLoi</div>
+                    </section>
                 }
             </article>
         </div>
@@ -63,8 +77,8 @@
 
                 @if (Model.ConNhanDon)
                 {
-                    @* BƯỚC 3 (UC07): nối nút này tới trang ứng tuyển, ví dụ asp-controller="Application" asp-action="Apply" asp-route-slug="..." *@
-                    <a href="#" class="btn-job-search btn-job-apply">Ứng tuyển</a>
+                
+                    <a asp-controller="Application" asp-action="Apply" asp-route-slug="@Model.Slug" class="btn-job-search btn-job-apply">Ứng tuyển</a>
                 }
                 else
                 {
