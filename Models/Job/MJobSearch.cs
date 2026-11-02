@@ -30,12 +30,10 @@ namespace WorkConnect.Models
             if (Keyword != null && Keyword.Length > 100) Keyword = Keyword.Substring(0, 100);
 
             LuongTuTrieu = ClampTrieu(LuongTuTrieu);
-            LuongDenTrieu = ClampTrieu(LuongDenTrieu);
-     
+            LuongDenTrieu = ClampTrieu(LuongDenTrieu);     
 
             if (string.IsNullOrEmpty(Sort) || !JobSort.All.Contains(Sort)) Sort = JobSort.MoiNhat;
         }
-
 
         public string? ValidateLuong()
         {
@@ -52,7 +50,6 @@ namespace WorkConnect.Models
     }
 
     public record OptionItem(int Id, string Name);
-
   
     public class JobFilterOptions
     {
