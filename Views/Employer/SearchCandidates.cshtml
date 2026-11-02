@@ -15,7 +15,7 @@
     <form asp-controller="Employer"
           asp-action="SearchCandidates"
           method="get"
-          class="card card-body mb-4">
+          class="card card-body mb-4" id="candidate-search-form">
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -79,11 +79,10 @@
         </div>
     </form>
 
+    <div id="candidate-search-message" class="small text-muted mb-2" aria-live="polite"></div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Danh sách ứng viên</h4>
-        <span class="text-muted">
-            Tìm thấy @Model.Candidates.Count ứng viên
-        </span>
+        <span class="text-muted" id="candidate-count">Tìm thấy @Model.Candidates.Count ứng viên</span>
     </div>
 
     @if (Model.Candidates.Count == 0)
@@ -108,7 +107,7 @@
                         <th>Thao tác</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="candidate-results">
                     @foreach (var candidate in Model.Candidates)
                     {
                         <tr>
@@ -136,3 +135,40 @@
         </div>
     }
 </div>
+
+@section Scripts {
+<script>
+$(function () {
+    let timer;
+    const form = $('#candidate-search-form');
+    const message = $('#candidate-search-message');
+    const results = $('#candidate-results');
+    const count = $('#candidate-count');
+    function esc(value) { return $('<div>').text(value == null ? '' : value).html(); }
+    function searchCandidates() {
+        message.text('Đang tìm kiếm...');
+        $.ajax({
+            url: '@Url.Action("SearchCandidatesAjax", "Employer")',
+            type: 'GET', data: form.serialize(), dataType: 'json'
+        }).done(function (response) {
+            if (!response || !response.success) { message.text('Không thể tìm ứng viên.'); return; }
+            count.text('Tìm thấy ' + response.count + ' ứng viên');
+            if (!response.candidates.length) {
+                results.html('<tr><td colspan="8" class="text-center text-muted">Không tìm thấy ứng viên phù hợp.</td></tr>');
+            } else {
+                results.html(response.candidates.map(function (c) {
+                    return '<tr><td>' + esc(c.hoTen) + '</td><td>' + esc(c.chuyenNganh) + '</td><td>' + esc(c.truong) + '</td><td>' + esc(c.kyNang) + '</td><td>' + esc(c.kinhNghiem || 'Chưa cập nhật') + '</td><td>' + esc(c.diaDiem) + '</td><td>' + esc(c.trinhDo) + '</td><td><a class="btn btn-sm btn-primary" href="/Employer/CandidateDetails/' + c.id + '">Xem hồ sơ</a></td></tr>';
+                }).join(''));
+            }
+            message.text('Kết quả đã cập nhật bằng AJAX.');
+        }).fail(function () { message.text('Có lỗi khi tìm kiếm. Vui lòng thử lại.'); });
+    }
+    form.on('input', 'input', function () { clearTimeout(timer); timer = setTimeout(searchCandidates, 350); });
+    form.on('change', 'select', searchCandidates);
+    form.on('submit', function (e) { e.preventDefault(); clearTimeout(timer); searchCandidates(); });
+    form.on('click', 'a.btn-outline-secondary', function (e) {
+        e.preventDefault(); form[0].reset(); searchCandidates();
+    });
+});
+</script>
+}
