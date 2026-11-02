@@ -1,0 +1,77 @@
+@model AdminDashboardViewModel
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Tiêu đề tin</th>
+                <th>Nhà tuyển dụng</th>
+                <th>Ngày đăng</th>
+                <th>Ngành nghề</th>
+                <th>Trạng thái</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.PendingJobs.Items.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-4">@(Model.PendingJobs.HasSearch ? "Không tìm thấy tin nào phù hợp." : "Không có tin tuyển dụng nào chờ duyệt.")</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var job in Model.PendingJobs.Items)
+                {
+                    <tr>
+                        <td>
+                            <strong>@job.Title</strong>
+                            <br /><small class="text-muted">Mức lương: @job.SalaryRange</small>
+                        </td>
+                        <td>@job.EmployerName</td>
+                        <td>@job.PostedDate.ToString("dd/MM/yyyy")</td>
+                        <td><span class="category-tag">@job.Category</span></td>
+                        <td><span class="badge badge-pending">Chờ duyệt</span></td>
+                        <td class="action-buttons text-center">
+                            <button type="button" class="btn-act btn-view" data-job-id="@job.JobId">
+                                <i class="fa-solid fa-eye"></i> Xem chi tiết
+                            </button>
+
+                            @* Nội dung chi tiết (đã được Razor encode) - modal sẽ lấy từ đây *@
+                            <template id="job-detail-@job.JobId">
+                                <h4 class="job-detail-title">@job.Title</h4>
+                                <span class="badge badge-pending">Chờ duyệt</span>
+
+                                <div class="job-detail-grid">
+                                    <div class="job-detail-item"><small>Nhà tuyển dụng</small><span>@job.EmployerName</span></div>
+                                    <div class="job-detail-item"><small>Ngành nghề</small><span>@job.Category</span></div>
+                                    <div class="job-detail-item"><small>Vị trí</small><span>@(string.IsNullOrWhiteSpace(job.Position) ? "Chưa cập nhật" : job.Position)</span></div>
+                                    <div class="job-detail-item"><small>Địa điểm</small><span>@job.Location</span></div>
+                                    <div class="job-detail-item"><small>Mức lương</small><span>@job.SalaryRange</span></div>
+                                    <div class="job-detail-item"><small>Số lượng tuyển</small><span>@job.Quantity</span></div>
+                                    <div class="job-detail-item"><small>Ngày đăng</small><span>@job.PostedDate.ToString("dd/MM/yyyy")</span></div>
+                                    <div class="job-detail-item"><small>Hạn ứng tuyển</small><span>@job.Deadline.ToString("dd/MM/yyyy")</span></div>
+                                    @if (!string.IsNullOrWhiteSpace(job.EmployerAddress))
+                                    {
+                                        <div class="job-detail-item" style="grid-column: 1 / -1;"><small>Địa chỉ công ty</small><span>@job.EmployerAddress</span></div>
+                                    }
+                                </div>
+
+                                <div class="job-detail-section">
+                                    <h4>Mô tả công việc</h4>
+                                    <div class="job-detail-text">@(string.IsNullOrWhiteSpace(job.Description) ? "Chưa có mô tả." : job.Description)</div>
+                                </div>
+                                <div class="job-detail-section">
+                                    <h4>Yêu cầu công việc</h4>
+                                    <div class="job-detail-text">@(string.IsNullOrWhiteSpace(job.Requirements) ? "Chưa có yêu cầu." : job.Requirements)</div>
+                                </div>
+                            </template>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Phân trang -->
+@await Html.PartialAsync("_AdminPager", Model.PendingJobs)

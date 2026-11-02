@@ -14,9 +14,12 @@
         (j.TrangThai ?? "").Contains("đang tuyển",
             StringComparison.OrdinalIgnoreCase));
 
+    // "Bản nháp" là trạng thái tin đang chờ admin duyệt
     var pendingJobs = jobs.Count(j =>
         (j.TrangThai ?? "").Contains("chờ duyệt",
-            StringComparison.OrdinalIgnoreCase));
+            StringComparison.OrdinalIgnoreCase) ||
+        j.TrangThai == "Bản nháp");
+    string StatusLabel(string? s) => s == "Bản nháp" ? "Chờ duyệt" : (s ?? "");
 
     var expiredJobs = jobs.Count(j =>
         (j.TrangThai ?? "").Contains("hết hạn",
@@ -364,7 +367,7 @@
                         aria-label="Lọc theo trạng thái">
                     <option value="">Tất cả trạng thái</option>
                     @foreach (var status in jobs
-                        .Select(j => j.TrangThai)
+                        .Select(j => StatusLabel(j.TrangThai))
                         .Where(s => !string.IsNullOrWhiteSpace(s))
                         .Distinct())
                     {
@@ -417,7 +420,7 @@
                             @foreach (var job in jobs)
                             {
                                 <tr data-job-row
-                                    data-status="@job.TrangThai">
+                                    data-status="@StatusLabel(job.TrangThai)">
                                     <td>#@job.MaTin</td>
 
                                     <td>
@@ -439,8 +442,8 @@
 
                                     <td>
                                         <span class="jobs-status"
-                                              data-status="@job.TrangThai">
-                                            @job.TrangThai
+                                              data-status="@StatusLabel(job.TrangThai)">
+                                            @StatusLabel(job.TrangThai)
                                         </span>
                                     </td>
 

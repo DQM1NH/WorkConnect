@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkConnect.Models;
+using WorkConnect.Services;
 
 namespace WorkConnect.Controllers
 {
@@ -34,7 +35,41 @@ namespace WorkConnect.Controllers
             cq = NormalizeSearch(cq);
             aq = NormalizeSearch(aq);
 
-            // ===== Tab "Duyệt nội dung": tin ở trạng thái Bản nháp =====
+            var ajax = Request.IsAjaxRequest();
+
+            var model = new AdminDashboardViewModel
+            {
+                ActiveTab = tab,
+
+                // Số liệu tổng quan (không phụ thuộc bộ lọc)
+                TotalUsers = await _context.TaiKhoans.CountAsync(),
+                TotalJobs = await _context.TinTuyenDungs.CountAsync(),
+                PendingApprovals = await _context.TinTuyenDungs.CountAsync(j => j.TrangThai == StatusDraft),
+                TotalApplications = await _context.DonUngTuyens.CountAsync()
+            };
+
+            // Tải trang đầy đủ: dựng cả 4 tab. Request AJAX: chỉ dựng đúng tab đang xem cho nhẹ.
+            if (!ajax || tab == "approval") model.PendingJobs = await BuildPendingJobsAsync(pq, pp);
+            if (!ajax || tab == "users") model.Users = await BuildUsersAsync(uq, up);
+            if (!ajax || tab == "content") model.Content = await BuildContentAsync(cq, cp);
+            if (!ajax || tab == "applications") model.Applications = await BuildApplicationsAsync(aq, ap);
+
+            if (ajax)
+            {
+                // AJAX (đổi tab / tìm kiếm / phân trang / làm mới sau thao tác): chỉ trả phần nội dung của tab
+                Response.Headers.CacheControl = "no-store, max-age=0";
+                ViewData["Tab"] = tab;
+                return PartialView("_AdminTabBody", model);
+            }
+
+            return View(model);
+        }
+
+        // ===================== DỰNG DỮ LIỆU TỪNG TAB =====================
+
+        // ===== Tab "Duyệt nội dung": tin ở trạng thái Bản nháp =====
+        private async Task<PagedResult<JobPendingViewModel>> BuildPendingJobsAsync(string? pq, int pp)
+        {
             var pendingQuery = _context.TinTuyenDungs.Where(j => j.TrangThai == StatusDraft);
             if (pq != null)
             {
@@ -56,7 +91,69 @@ namespace WorkConnect.Controllers
                     EmployerAddress = j.NhaTuyenDung != null ? j.NhaTuyenDung.DiaChi : null
                 });
 
-            // ===== Tab "Quản lý bài đăng": toàn bộ tin, mọi trạng thái =====
+            return await PagedResult<JobPendingViewModel>.CreateAsync(
+                pendingSource,
+                j => new JobPendingViewModel
+                {
+                    JobId = j.MaTin,
+                    Title = j.TieuDe,
+                    EmployerName = j.Employer ?? "N/A",
+                    Category = j.Category ?? "Chưa phân loại",
+                    PostedDate = j.NgayDang,
+                    SalaryRange = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan),
+                    Position = j.ViTri ?? string.Empty,
+                    Location = j.Location ?? "Chưa cập nhật",
+                    Quantity = j.SoLuongTuyen?.ToString("N0") ?? "—",
+                    Deadline = j.HanUngTuyen,
+                    Description = j.MoTaCongViec ?? string.Empty,
+                    Requirements = j.YeuCauCongViec ?? string.Empty,
+                    EmployerAddress = j.EmployerAddress ?? string.Empty
+                },
+                pp, PageSize, pq, "approval", "pq", "pp");
+        }
+
+        // ===== Tab "Quản lý người dùng" =====
+        private async Task<PagedResult<UserAdminViewModel>> BuildUsersAsync(string? uq, int up)
+        {
+            var usersQuery = _context.TaiKhoans.AsQueryable();
+            if (uq != null)
+            {
+                // Cho phép gõ "USR0012" hoặc "12" để tìm theo mã; gõ tên vai trò ("nhà tuyển dụng"...) để lọc theo vai trò
+                var idText = uq.StartsWith("USR", StringComparison.OrdinalIgnoreCase) ? uq[3..] : uq;
+                var userId = int.TryParse(idText, out var n) ? n : -1;
+
+                var lower = uq.ToLowerInvariant();
+                var roleIds = new List<int>();
+                if ("admin".Contains(lower)) roleIds.Add(AppRoles.AdminId);
+                if ("nhà tuyển dụng".Contains(lower)) roleIds.Add(AppRoles.NhaTuyenDungId);
+                if ("ứng viên".Contains(lower)) roleIds.Add(AppRoles.UngVienId);
+
+                usersQuery = usersQuery.Where(u =>
+                    u.HoTen.Contains(uq) || u.Email.Contains(uq) ||
+                    u.MaTaiKhoan == userId || roleIds.Contains(u.MaVaiTro));
+            }
+            var usersSource = usersQuery
+                .OrderByDescending(u => u.NgayTao).ThenByDescending(u => u.MaTaiKhoan)
+                .Select(u => new { u.MaTaiKhoan, u.HoTen, u.Email, u.MaVaiTro, u.NgayTao, u.BiKhoa });
+
+            return await PagedResult<UserAdminViewModel>.CreateAsync(
+                usersSource,
+                u => new UserAdminViewModel
+                {
+                    RawId = u.MaTaiKhoan,
+                    UserId = $"USR{u.MaTaiKhoan:D4}",
+                    FullName = u.HoTen,
+                    Email = u.Email,
+                    Role = u.MaVaiTro == 1 ? "Admin" : (u.MaVaiTro == 2 ? "Nhà tuyển dụng" : "Ứng viên"),
+                    CreatedDate = u.NgayTao,
+                    IsActive = !u.BiKhoa
+                },
+                up, PageSize, uq, "users", "uq", "up");
+        }
+
+        // ===== Tab "Quản lý bài đăng": toàn bộ tin, mọi trạng thái =====
+        private async Task<PagedResult<ContentAdminViewModel>> BuildContentAsync(string? cq, int cp)
+        {
             var contentQuery = _context.TinTuyenDungs.AsQueryable();
             if (cq != null)
             {
@@ -73,7 +170,25 @@ namespace WorkConnect.Controllers
                     j.NgayDang, j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan, j.SoLuongTuyen, j.TrangThai, j.BiAn
                 });
 
-            // ===== Tab "Đơn ứng tuyển": ghép đơn + tin tuyển dụng + ứng viên + nhà tuyển dụng =====
+            return await PagedResult<ContentAdminViewModel>.CreateAsync(
+                contentSource,
+                j => new ContentAdminViewModel
+                {
+                    JobId = j.MaTin,
+                    Title = j.TieuDe,
+                    EmployerName = j.Employer ?? "N/A",
+                    Salary = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan),
+                    Quantity = j.SoLuongTuyen?.ToString("N0") ?? "—",
+                    PostedDate = j.NgayDang,
+                    Status = j.TrangThai,
+                    IsHidden = j.BiAn
+                },
+                cp, PageSize, cq, "content", "cq", "cp");
+        }
+
+        // ===== Tab "Đơn ứng tuyển": ghép đơn + tin tuyển dụng + ứng viên + nhà tuyển dụng =====
+        private async Task<PagedResult<ApplicationAdminViewModel>> BuildApplicationsAsync(string? aq, int ap)
+        {
             var applicationsBase =
                 from d in _context.DonUngTuyens
                 join t in _context.TinTuyenDungs on d.MaTin equals t.MaTin
@@ -102,104 +217,23 @@ namespace WorkConnect.Controllers
             var applicationsSource = applicationsBase
                 .OrderByDescending(a => a.NgayNop).ThenByDescending(a => a.MaDon);
 
-            // ===== Tab "Quản lý người dùng" =====
-            var usersQuery = _context.TaiKhoans.AsQueryable();
-            if (uq != null)
-            {
-                // Cho phép gõ "USR0012" hoặc "12" để tìm theo mã; gõ tên vai trò ("nhà tuyển dụng"...) để lọc theo vai trò
-                var idText = uq.StartsWith("USR", StringComparison.OrdinalIgnoreCase) ? uq[3..] : uq;
-                var userId = int.TryParse(idText, out var n) ? n : -1;
-
-                var lower = uq.ToLowerInvariant();
-                var roleIds = new List<int>();
-                if ("admin".Contains(lower)) roleIds.Add(AppRoles.AdminId);
-                if ("nhà tuyển dụng".Contains(lower)) roleIds.Add(AppRoles.NhaTuyenDungId);
-                if ("ứng viên".Contains(lower)) roleIds.Add(AppRoles.UngVienId);
-
-                usersQuery = usersQuery.Where(u =>
-                    u.HoTen.Contains(uq) || u.Email.Contains(uq) ||
-                    u.MaTaiKhoan == userId || roleIds.Contains(u.MaVaiTro));
-            }
-            var usersSource = usersQuery
-                .OrderByDescending(u => u.NgayTao).ThenByDescending(u => u.MaTaiKhoan)
-                .Select(u => new { u.MaTaiKhoan, u.HoTen, u.Email, u.MaVaiTro, u.NgayTao, u.BiKhoa });
-
-            var model = new AdminDashboardViewModel
-            {
-                ActiveTab = tab,
-
-                // Số liệu tổng quan (không phụ thuộc bộ lọc)
-                TotalUsers = await _context.TaiKhoans.CountAsync(),
-                TotalJobs = await _context.TinTuyenDungs.CountAsync(),
-                PendingApprovals = await _context.TinTuyenDungs.CountAsync(j => j.TrangThai == StatusDraft),
-                TotalApplications = await _context.DonUngTuyens.CountAsync(),
-
-                PendingJobs = await PagedResult<JobPendingViewModel>.CreateAsync(
-                    pendingSource,
-                    j => new JobPendingViewModel
-                    {
-                        JobId = j.MaTin,
-                        Title = j.TieuDe,
-                        EmployerName = j.Employer ?? "N/A",
-                        Category = j.Category ?? "Chưa phân loại",
-                        PostedDate = j.NgayDang,
-                        SalaryRange = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan),
-                        Position = j.ViTri ?? string.Empty,
-                        Location = j.Location ?? "Chưa cập nhật",
-                        Quantity = j.SoLuongTuyen?.ToString("N0") ?? "—",
-                        Deadline = j.HanUngTuyen,
-                        Description = j.MoTaCongViec ?? string.Empty,
-                        Requirements = j.YeuCauCongViec ?? string.Empty,
-                        EmployerAddress = j.EmployerAddress ?? string.Empty
-                    },
-                    pp, PageSize, pq, "approval", "pq", "pp"),
-
-                Users = await PagedResult<UserAdminViewModel>.CreateAsync(
-                    usersSource,
-                    u => new UserAdminViewModel
-                    {
-                        RawId = u.MaTaiKhoan,
-                        UserId = $"USR{u.MaTaiKhoan:D4}",
-                        FullName = u.HoTen,
-                        Email = u.Email,
-                        Role = u.MaVaiTro == 1 ? "Admin" : (u.MaVaiTro == 2 ? "Nhà tuyển dụng" : "Ứng viên"),
-                        CreatedDate = u.NgayTao,
-                        IsActive = !u.BiKhoa
-                    },
-                    up, PageSize, uq, "users", "uq", "up"),
-
-                Content = await PagedResult<ContentAdminViewModel>.CreateAsync(
-                    contentSource,
-                    j => new ContentAdminViewModel
-                    {
-                        JobId = j.MaTin,
-                        Title = j.TieuDe,
-                        EmployerName = j.Employer ?? "N/A",
-                        Salary = FormatSalary(j.LuongToiThieu, j.LuongToiDa, j.LuongThoaThuan),
-                        Quantity = j.SoLuongTuyen?.ToString("N0") ?? "—",
-                        PostedDate = j.NgayDang,
-                        Status = j.TrangThai,
-                        IsHidden = j.BiAn
-                    },
-                    cp, PageSize, cq, "content", "cq", "cp"),
-
-                Applications = await PagedResult<ApplicationAdminViewModel>.CreateAsync(
-                    applicationsSource,
-                    a => new ApplicationAdminViewModel
-                    {
-                        ApplicationId = a.MaDon,
-                        CandidateName = string.IsNullOrWhiteSpace(a.HoTen) ? "N/A" : a.HoTen,
-                        CandidateEmail = a.Email,
-                        CandidatePhone = a.SoDienThoai,
-                        JobTitle = a.TieuDe,
-                        EmployerName = a.TenCongTy ?? "N/A",
-                        AppliedDate = a.NgayNop
-                    },
-                    ap, PageSize, aq, "applications", "aq", "ap")
-            };
-
-            return View(model);
+            return await PagedResult<ApplicationAdminViewModel>.CreateAsync(
+                applicationsSource,
+                a => new ApplicationAdminViewModel
+                {
+                    ApplicationId = a.MaDon,
+                    CandidateName = string.IsNullOrWhiteSpace(a.HoTen) ? "N/A" : a.HoTen,
+                    CandidateEmail = a.Email,
+                    CandidatePhone = a.SoDienThoai,
+                    JobTitle = a.TieuDe,
+                    EmployerName = a.TenCongTy ?? "N/A",
+                    AppliedDate = a.NgayNop
+                },
+                ap, PageSize, aq, "applications", "aq", "ap");
         }
+
+        // ===================== CÁC THAO TÁC (AJAX) =====================
+        // Gọi bằng AJAX -> trả JSON { success, message }; không phải AJAX (JS bị tắt) -> TempData + redirect như cũ.
 
         // Action xử lý Duyệt tin (gọi từ modal "Xem chi tiết")
         [HttpPost]
@@ -208,23 +242,16 @@ namespace WorkConnect.Controllers
         {
             var job = await _context.TinTuyenDungs.FindAsync(id);
             if (job == null)
-            {
-                TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy tin tuyển dụng.", returnUrl, StatusCodes.Status404NotFound);
 
             // Chỉ xử lý tin còn đang chờ duyệt (tránh duyệt lại khi trang đã cũ / bấm 2 lần)
             if (job.TrangThai != StatusDraft)
-            {
-                TempData["Error"] = "Tin này đã được xử lý trước đó.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Tin này đã được xử lý trước đó.", returnUrl, StatusCodes.Status409Conflict);
 
             job.TrangThai = StatusOpen;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Đã duyệt tin \"{job.TieuDe}\".";
-            return RedirectBack(returnUrl);
+            return Succeeded($"Đã duyệt tin \"{job.TieuDe}\".", returnUrl);
         }
 
         // Action xử lý Từ chối tin (gọi từ modal "Xem chi tiết")
@@ -234,22 +261,15 @@ namespace WorkConnect.Controllers
         {
             var job = await _context.TinTuyenDungs.FindAsync(id);
             if (job == null)
-            {
-                TempData["Error"] = "Không tìm thấy tin tuyển dụng.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy tin tuyển dụng.", returnUrl, StatusCodes.Status404NotFound);
 
             if (job.TrangThai != StatusDraft)
-            {
-                TempData["Error"] = "Tin này đã được xử lý trước đó.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Tin này đã được xử lý trước đó.", returnUrl, StatusCodes.Status409Conflict);
 
             job.TrangThai = StatusRejected;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Đã từ chối tin \"{job.TieuDe}\".";
-            return RedirectBack(returnUrl);
+            return Succeeded($"Đã từ chối tin \"{job.TieuDe}\".", returnUrl);
         }
 
         // Action ẩn / hiện bài đăng (tab Quản lý bài đăng)
@@ -259,16 +279,12 @@ namespace WorkConnect.Controllers
         {
             var job = await _context.TinTuyenDungs.FindAsync(id);
             if (job == null)
-            {
-                TempData["Error"] = "Không tìm thấy bài đăng.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy bài đăng.", returnUrl, StatusCodes.Status404NotFound);
 
             job.BiAn = !job.BiAn;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = job.BiAn ? "Đã ẩn bài đăng." : "Đã hiện lại bài đăng.";
-            return RedirectBack(returnUrl);
+            return Succeeded(job.BiAn ? "Đã ẩn bài đăng." : "Đã hiện lại bài đăng.", returnUrl);
         }
 
         [HttpPost]
@@ -278,26 +294,22 @@ namespace WorkConnect.Controllers
             var job = await _context.TinTuyenDungs.FindAsync(id);
 
             if (job == null)
-            {
-                TempData["Error"] = "Không tìm thấy bài đăng cần xóa.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy bài đăng cần xóa.", returnUrl, StatusCodes.Status404NotFound);
 
             try
             {
                 _context.TinTuyenDungs.Remove(job);
                 await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Xóa bài đăng thành công.";
             }
             catch (DbUpdateException)
             {
                 // Còn dữ liệu liên quan chặn việc xóa -> gợi ý ẩn bài đăng thay vì để lỗi 500
                 _context.ChangeTracker.Clear();
-                TempData["Error"] = "Không thể xóa bài đăng vì còn dữ liệu liên quan (đơn ứng tuyển...). Hãy dùng chức năng Ẩn thay thế.";
+                return Failed("Không thể xóa bài đăng vì còn dữ liệu liên quan (đơn ứng tuyển...). Hãy dùng chức năng Ẩn thay thế.",
+                    returnUrl, StatusCodes.Status409Conflict);
             }
 
-            return RedirectBack(returnUrl);
+            return Succeeded("Xóa bài đăng thành công.", returnUrl);
         }
 
         // Action xử lý Khóa / Mở khóa tài khoản
@@ -307,25 +319,18 @@ namespace WorkConnect.Controllers
         {
             var user = await _context.TaiKhoans.FindAsync(id);
             if (user == null)
-            {
-                TempData["Error"] = "Không tìm thấy tài khoản.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy tài khoản.", returnUrl, StatusCodes.Status404NotFound);
 
             // Không cho khóa chính mình hoặc tài khoản Admin khác
             if (IsCurrentUser(user.MaTaiKhoan) || user.MaVaiTro == AppRoles.AdminId)
-            {
-                TempData["Error"] = "Không thể khóa tài khoản quản trị viên.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không thể khóa tài khoản quản trị viên.", returnUrl, StatusCodes.Status403Forbidden);
 
             user.BiKhoa = !user.BiKhoa;
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = user.BiKhoa
+            return Succeeded(user.BiKhoa
                 ? $"Đã khóa tài khoản {user.Email}."
-                : $"Đã mở khóa tài khoản {user.Email}.";
-            return RedirectBack(returnUrl);
+                : $"Đã mở khóa tài khoản {user.Email}.", returnUrl);
         }
 
         // Action xử lý xóa tài khoản
@@ -335,17 +340,11 @@ namespace WorkConnect.Controllers
         {
             var user = await _context.TaiKhoans.FindAsync(id);
             if (user == null)
-            {
-                TempData["Error"] = "Không tìm thấy tài khoản.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không tìm thấy tài khoản.", returnUrl, StatusCodes.Status404NotFound);
 
             // Không cho xóa chính mình hoặc tài khoản Admin khác
             if (IsCurrentUser(user.MaTaiKhoan) || user.MaVaiTro == AppRoles.AdminId)
-            {
-                TempData["Error"] = "Không thể xóa tài khoản quản trị viên.";
-                return RedirectBack(returnUrl);
-            }
+                return Failed("Không thể xóa tài khoản quản trị viên.", returnUrl, StatusCodes.Status403Forbidden);
 
             try
             {
@@ -355,15 +354,35 @@ namespace WorkConnect.Controllers
 
                 _context.TaiKhoans.Remove(user);
                 await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Xóa tài khoản thành công.";
             }
             catch (DbUpdateException)
             {
                 // Vẫn còn dữ liệu liên quan (vd: nhà tuyển dụng đang có tin đăng) -> gợi ý khóa thay vì xóa
-                TempData["Error"] = "Không thể xóa vì tài khoản còn dữ liệu liên quan (tin đăng, hồ sơ...). Hãy dùng chức năng Khóa thay thế.";
+                _context.ChangeTracker.Clear();
+                return Failed("Không thể xóa vì tài khoản còn dữ liệu liên quan (tin đăng, hồ sơ...). Hãy dùng chức năng Khóa thay thế.",
+                    returnUrl, StatusCodes.Status409Conflict);
             }
 
+            return Succeeded("Xóa tài khoản thành công.", returnUrl);
+        }
+
+        // Kết quả thành công: AJAX -> JSON; thường -> TempData + quay lại trang đang xem
+        private IActionResult Succeeded(string message, string? returnUrl)
+        {
+            if (Request.IsAjaxRequest())
+                return Json(new { success = true, message });
+
+            TempData["Success"] = message;
+            return RedirectBack(returnUrl);
+        }
+
+        // Kết quả thất bại: AJAX -> JSON kèm mã lỗi HTTP; thường -> TempData + quay lại trang đang xem
+        private IActionResult Failed(string message, string? returnUrl, int statusCode)
+        {
+            if (Request.IsAjaxRequest())
+                return StatusCode(statusCode, new { success = false, message });
+
+            TempData["Error"] = message;
             return RedirectBack(returnUrl);
         }
 

@@ -1,0 +1,51 @@
+@model AdminDashboardViewModel
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Mã đơn</th>
+                <th>Ứng viên</th>
+                <th>Liên hệ</th>
+                <th>Vị trí ứng tuyển</th>
+                <th>Nhà tuyển dụng</th>
+                <th>Ngày nộp</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Applications.Items.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-4">@(Model.Applications.HasSearch ? "Không tìm thấy đơn ứng tuyển nào phù hợp." : "Chưa có đơn ứng tuyển nào.")</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var app in Model.Applications.Items)
+                {
+                    <tr>
+                        <td>#@app.ApplicationId</td>
+                        <td>
+                            <div class="user-info-cell">
+                                <div class="user-avatar">@app.CandidateName.Substring(0, 1).ToUpper()</div>
+                                <strong>@app.CandidateName</strong>
+                            </div>
+                        </td>
+                        <td>
+                            @app.CandidateEmail
+                            @if (!string.IsNullOrWhiteSpace(app.CandidatePhone))
+                            {
+                                <br /><small class="text-muted">@app.CandidatePhone</small>
+                            }
+                        </td>
+                        <td><strong>@app.JobTitle</strong></td>
+                        <td>@app.EmployerName</td>
+                        <td>@app.AppliedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!-- Phân trang -->
+@await Html.PartialAsync("_AdminPager", Model.Applications)

@@ -34,7 +34,7 @@
             <nav class="pager" aria-label="Phân trang">
                 @if (Model.HasPrevious)
                 {
-                    <a class="pager-btn" href="@PageUrl(Model.Page - 1)" title="Trang trước"><i class="fa-solid fa-chevron-left"></i></a>
+                    <a class="pager-btn" href="@PageUrl(Model.Page - 1)" data-page="@(Model.Page - 1)" title="Trang trước"><i class="fa-solid fa-chevron-left"></i></a>
                 }
                 else
                 {
@@ -54,14 +54,14 @@
                     }
                     else
                     {
-                        <a class="pager-btn" href="@PageUrl(p)">@p</a>
+                        <a class="pager-btn" href="@PageUrl(p)" data-page="@p">@p</a>
                     }
                     prev = p;
                 }
 
                 @if (Model.HasNext)
                 {
-                    <a class="pager-btn" href="@PageUrl(Model.Page + 1)" title="Trang sau"><i class="fa-solid fa-chevron-right"></i></a>
+                    <a class="pager-btn" href="@PageUrl(Model.Page + 1)" data-page="@(Model.Page + 1)" title="Trang sau"><i class="fa-solid fa-chevron-right"></i></a>
                 }
                 else
                 {

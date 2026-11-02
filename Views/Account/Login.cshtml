@@ -10,7 +10,6 @@
     <h2 class="page-title">Chào mừng bạn tham gia WorkConnect</h2>
 
     <div class="register-card">
-        <!-- Cột bên trái: Giới thiệu tính năng -->
         <div class="left-panel">
             <div class="feature-item">
                 <div class="feature-icon icon-blue">
@@ -43,7 +42,6 @@
             </div>
         </div>
 
-        <!-- Cột bên phải: Form đăng nhập -->
         <div class="right-panel">
             <div class="tab-header">
                 <a asp-action="Login" class="tab-item active">ĐĂNG NHẬP</a>
@@ -55,7 +53,7 @@
                 <div class="alert alert-success" role="alert">@successMessage</div>
             }
 
-            <form asp-action="Login" asp-route-returnUrl="@(ViewData["ReturnUrl"] as string)" method="post" class="register-form">
+            <form asp-action="Login" asp-route-returnUrl="@(ViewData["ReturnUrl"] as string)" method="post" class="register-form" data-ajax-form>
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
@@ -91,6 +89,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/account.js" asp-append-version="true"></script>
 }
 
 <script>

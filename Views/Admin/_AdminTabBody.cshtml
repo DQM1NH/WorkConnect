@@ -1,0 +1,40 @@
+@model AdminDashboardViewModel
+@{
+    // Tab nào được dựng: do controller (AJAX) hoặc Index.cshtml (lần tải đầu) truyền qua ViewData["Tab"]
+    var tab = ViewData["Tab"] as string ?? Model.ActiveTab;
+    PagedResultBase paged = tab switch
+    {
+        "users" => Model.Users,
+        "content" => Model.Content,
+        "applications" => Model.Applications,
+        _ => Model.PendingJobs
+    };
+}
+
+@* Dữ liệu cho JavaScript: cập nhật 4 ô thống kê + nhớ từ khóa / trang hiện tại của tab *@
+<div class="admin-payload" hidden
+     data-tab="@tab"
+     data-page="@paged.Page"
+     data-q="@paged.Search"
+     data-total-users="@Model.TotalUsers.ToString("N0")"
+     data-total-jobs="@Model.TotalJobs.ToString("N0")"
+     data-pending="@Model.PendingApprovals.ToString("N0")"
+     data-pending-raw="@Model.PendingApprovals"
+     data-total-applications="@Model.TotalApplications.ToString("N0")"></div>
+
+@if (tab == "users")
+{
+    <partial name="_AdminTabUsers" model="Model" />
+}
+else if (tab == "content")
+{
+    <partial name="_AdminTabContent" model="Model" />
+}
+else if (tab == "applications")
+{
+    <partial name="_AdminTabApplications" model="Model" />
+}
+else
+{
+    <partial name="_AdminTabApproval" model="Model" />
+}

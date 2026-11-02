@@ -10,7 +10,6 @@
     <h2 class="page-title">Tham gia ngay hôm nay</h2>
 
     <div class="register-card">
-        <!-- Cột bên trái: Giới thiệu tính năng -->
         <div class="left-panel">
             <div class="feature-item">
                 <div class="feature-icon icon-blue">
@@ -43,14 +42,13 @@
             </div>
         </div>
 
-        <!-- Cột bên phải: Form đăng ký -->
         <div class="right-panel">
             <div class="tab-header">
                 <a asp-action="Login" class="tab-item">ĐĂNG NHẬP</a>
                 <a asp-action="Register" class="tab-item active">ĐĂNG KÝ</a>
             </div>
 
-            <form asp-action="Register" method="post" class="register-form">
+            <form asp-action="Register" method="post" class="register-form" data-ajax-form>
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
@@ -107,12 +105,12 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Quy tắc client-side cho [MustBeTrue] (checkbox đồng ý điều khoản)
         $.validator.addMethod("mustbetrue", function (value, element) {
             return element.checked;
         });
         $.validator.unobtrusive.adapters.addBool("mustbetrue");
     </script>
+    <script src="~/js/account.js" asp-append-version="true"></script>
 }
 
 <script>
