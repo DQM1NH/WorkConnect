@@ -726,6 +726,69 @@ namespace WorkConnect.Controllers
 
             return View(model);
         }
+
+        [Authorize(Roles = AppRoles.NhaTuyenDung)]
+        [HttpGet]
+        public async Task<IActionResult> SearchCandidatesAjax(
+            string? keyword, string? chuyenNganh, string? kyNang, string? kinhNghiem)
+        {
+            var candidates = _context.UngViens
+                .AsNoTracking()
+                .Include(x => x.DiaDiem)
+                .Include(x => x.TrinhDo)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+                candidates = candidates.Where(x => x.HoTen.Contains(keyword) ||
+                    x.Truong.Contains(keyword) || x.ChuyenNganh.Contains(keyword) ||
+                    x.KyNang.Contains(keyword));
+            if (!string.IsNullOrWhiteSpace(chuyenNganh))
+                candidates = candidates.Where(x => x.ChuyenNganh == chuyenNganh);
+            if (!string.IsNullOrWhiteSpace(kyNang))
+                candidates = candidates.Where(x => x.KyNang.Contains(kyNang));
+            if (!string.IsNullOrWhiteSpace(kinhNghiem))
+                candidates = candidates.Where(x => x.KinhNghiem != null &&
+                    x.KinhNghiem.Contains(kinhNghiem));
+
+            var result = await candidates.OrderBy(x => x.HoTen).Select(x => new
+            {
+                id = x.MaUngVien, hoTen = x.HoTen, chuyenNganh = x.ChuyenNganh,
+                truong = x.Truong, kyNang = x.KyNang, kinhNghiem = x.KinhNghiem,
+                diaDiem = x.DiaDiem != null ? x.DiaDiem.TenDiaDiem : "Chưa cập nhật",
+                trinhDo = x.TrinhDo != null ? x.TrinhDo.TenTrinhDo : "Chưa cập nhật"
+            }).ToListAsync();
+
+            return Json(new { success = true, count = result.Count, candidates = result });
+        }
+
+        // AJAX: Lọc danh sách hồ sơ ứng tuyển theo trạng thái.
+        [Authorize(Roles = "Employer")]
+        [HttpGet]
+        public async Task<IActionResult> FilterApplicationsAjax(int id, int? status)
+        {
+            var maTaiKhoan = GetMaTaiKhoan();
+            if (maTaiKhoan == null) return Unauthorized();
+            var maNhaTuyenDung = await GetMaNhaTuyenDung(maTaiKhoan.Value);
+            if (maNhaTuyenDung == null) return NotFound();
+
+            var job = await _context.TinTuyenDungs.AsNoTracking().FirstOrDefaultAsync(x =>
+                x.MaTin == id && x.MaNhaTuyenDung == maNhaTuyenDung.Value);
+            if (job == null) return NotFound();
+
+            var query = _context.DonUngTuyens.AsNoTracking()
+                .Where(x => x.MaTin == job.MaTin)
+                .Include(x => x.UngVien).Include(x => x.TrangThai).AsQueryable();
+            if (status.HasValue) query = query.Where(x => x.MaTrangThai == status.Value);
+
+            var result = await query.OrderByDescending(x => x.NgayNop).Select(x => new
+            {
+                maDon = x.MaDon, hoTen = x.HoTen ?? (x.UngVien != null ? x.UngVien.HoTen : "Chưa cập nhật"),
+                maUngVien = x.MaUngVien, maTrangThai = x.MaTrangThai,
+                tenTrangThai = x.TrangThai != null ? x.TrangThai.TenTrangThai : "Chưa xác định",
+                ngayNop = x.NgayNop.ToString("dd/MM/yyyy HH:mm")
+            }).ToListAsync();
+            return Json(new { success = true, count = result.Count, applications = result });
+        }
         
         [Authorize(Roles = AppRoles.NhaTuyenDung)]
         [HttpGet]
@@ -757,69 +820,64 @@ namespace WorkConnect.Controllers
             DateTime? thoiGianPhongVan,
             string? diaDiemPhongVan)
         {
+            var isAjax = string.Equals(
+                Request.Headers["X-Requested-With"],
+                "XMLHttpRequest",
+                StringComparison.OrdinalIgnoreCase);
+
             var maTaiKhoan = GetMaTaiKhoan();
-
             if (maTaiKhoan == null)
-                return Challenge();
+                return isAjax
+                    ? Unauthorized(new { success = false, message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." })
+                    : Challenge();
 
-            var maNhaTuyenDung = await GetMaNhaTuyenDung(
-                maTaiKhoan.Value);
+            var maNhaTuyenDung = await GetMaNhaTuyenDung(maTaiKhoan.Value);
 
             if (maNhaTuyenDung == null)
-                return NotFound(
-                    "Tài khoản chưa có hồ sơ nhà tuyển dụng.");
+                return isAjax
+                    ? NotFound(new { success = false, message = "Tài khoản chưa có hồ sơ nhà tuyển dụng." })
+                    : NotFound("Tài khoản chưa có hồ sơ nhà tuyển dụng.");
 
-            // Chỉ cho phép trạng thái từ 2 đến 5.
-            // Trạng thái 1 = Đã gửi là trạng thái ban đầu.
             if (maTrangThai < 2 || maTrangThai > 5)
             {
-                return BadRequest("Trạng thái xét duyệt không hợp lệ.");
+                return isAjax
+                    ? BadRequest(new { success = false, message = "Trạng thái xét duyệt không hợp lệ." })
+                    : BadRequest("Trạng thái xét duyệt không hợp lệ.");
             }
 
-            // Kiểm tra hồ sơ có thuộc tin của nhà tuyển dụng hiện tại không.
             var don = await _context.DonUngTuyens
                 .Include(x => x.TinTuyenDung)
-                .FirstOrDefaultAsync(x =>
-                    x.MaDon == maDon &&
+                .FirstOrDefaultAsync(x => x.MaDon == maDon &&
                     x.TinTuyenDung != null &&
-                    x.TinTuyenDung.MaNhaTuyenDung
-                        == maNhaTuyenDung.Value);
+                    x.TinTuyenDung.MaNhaTuyenDung == maNhaTuyenDung.Value);
 
             if (don == null)
             {
-                return NotFound(
-                    "Không tìm thấy hồ sơ hoặc bạn không có quyền xét duyệt.");
+                return isAjax 
+                    ? NotFound(new { success = false, message = "Không tìm thấy hồ sơ hoặc bạn không có quyền xét duyệt." })
+                    : NotFound("Không tìm thấy hồ sơ hoặc bạn không có quyền xét duyệt.");
             }
 
-            // Nếu chọn Mời phỏng vấn thì bắt buộc có thời gian và địa điểm.
             if (maTrangThai == 3)
             {
-                if (!thoiGianPhongVan.HasValue ||
-                    string.IsNullOrWhiteSpace(diaDiemPhongVan))
+                if (!thoiGianPhongVan.HasValue || string.IsNullOrWhiteSpace(diaDiemPhongVan))
                 {
-                    TempData["Error"] =
-                        "Vui lòng nhập thời gian và địa điểm phỏng vấn.";
-
-                    return RedirectToAction(
-                        "Applications",
-                        new { id = don.MaTin });
+                    const string error = "Vui lòng nhập thời gian và địa điểm phỏng vấn.";
+                    if (isAjax) return BadRequest(new { success = false, message = error });
+                    TempData["Error"] = error;
+                    return RedirectToAction("Applications", new { id = don.MaTin });
                 }
 
                 if (thoiGianPhongVan.Value <= DateTime.Now)
                 {
-                    TempData["Error"] =
-                        "Thời gian phỏng vấn phải ở trong tương lai.";
-
-                    return RedirectToAction(
-                        "Applications",
-                        new { id = don.MaTin });
+                    const string error = "Thời gian phỏng vấn phải ở trong tương lai.";
+                    if (isAjax) return BadRequest(new { success = false, message = error });
+                    TempData["Error"] = error;
+                    return RedirectToAction("Applications", new { id = don.MaTin });
                 }
             }
 
-            // Cập nhật trạng thái hiện tại của hồ sơ.
             don.MaTrangThai = maTrangThai;
-
-            // Tạo bản ghi lịch sử xử lý.
             var lichSu = new LichSuXuLyDon
             {
                 MaDon = don.MaDon,
@@ -832,15 +890,21 @@ namespace WorkConnect.Controllers
             };
 
             _context.LichSuXuLyDons.Add(lichSu);
-
             await _context.SaveChangesAsync();
 
-            TempData["Success"] =
-                "Đã cập nhật trạng thái hồ sơ ứng tuyển.";
+            const string successMessage = "Đã cập nhật trạng thái hồ sơ ứng tuyển.";
+            if (isAjax)
+            {
+                var tenTrangThai = await _context.TrangThaiDons
+                    .Where(x => x.MaTrangThai == maTrangThai)
+                    .Select(x => x.TenTrangThai)
+                    .FirstOrDefaultAsync() ?? "Đã cập nhật";
 
-            return RedirectToAction(
-                "Applications",
-                new { id = don.MaTin });
+            return Json(new{ success = true, message = successMessage, maDon = don.MaDon, maTrangThai = don.MaTrangThai, tenTrangThai});
+            }
+
+            TempData["Success"] = successMessage;
+            return RedirectToAction("Applications", new { id = don.MaTin });
         }
 
         // Tìm mã hồ sơ nhà tuyển dụng theo tài khoản

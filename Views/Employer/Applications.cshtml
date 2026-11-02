@@ -1,4 +1,4 @@
- @model IEnumerable<WorkConnect.Models.Entities.DonUngTuyen>
+@model IEnumerable<WorkConnect.Models.Entities.DonUngTuyen>
 
 @{
     ViewData["Title"] = "Hồ sơ ứng tuyển";
@@ -20,6 +20,8 @@
         </a>
     </div>
 
+    <div id="ajax-review-message" class="alert d-none" role="status" aria-live="polite"></div>
+
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success">
@@ -34,6 +36,17 @@
         </div>
     }
 
+        <div class="row g-2 mb-3 align-items-end">
+            <div class="col-sm-5 col-md-4">
+                <label for="application-status-filter" class="form-label">Lọc hồ sơ theo trạng thái</label>
+                <select id="application-status-filter" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="1">Đã gửi</option><option value="2">Đang xem xét</option>
+                    <option value="3">Mời phỏng vấn</option><option value="4">Đạt</option><option value="5">Từ chối</option>
+                </select>
+            </div>
+            <div class="col-auto"><span id="application-filter-message" class="small text-muted" aria-live="polite"></span></div>
+        </div>
     <div class="card shadow-sm">
         <div class="card-body">
             <h5 class="mb-3">
@@ -74,7 +87,7 @@
                             {
                                 stt++;
 
-                                <tr>
+                                <tr data-application-status="@don.MaTrangThai">
                                     <td>@stt</td>
 
                                     <td>
@@ -108,7 +121,7 @@
                                     </td>
 
                                     <td>
-                                        <span class="badge
+                                        <span id="status-@don.MaDon" class="badge
                                             @(don.MaTrangThai == 4 ? "bg-success" :
                                               don.MaTrangThai == 5 ? "bg-danger" :
                                               don.MaTrangThai == 3 ? "bg-info text-dark" :
@@ -140,7 +153,8 @@
                                     <td>
                                         <form asp-controller="Employer"
                                               asp-action="ReviewApplication"
-                                              method="post">
+                                              method="post"
+                                              class="ajax-review-form">
 
                                             @Html.AntiForgeryToken()
 
@@ -239,3 +253,81 @@
         </div>
     </div>
 </div>
+@section Scripts {
+    <script>
+        $(document).on('submit', '.ajax-review-form', function (event) {
+            event.preventDefault();
+
+            const form = $(this);
+            const button = form.find('button[type="submit"]');
+            const messageBox = $('#ajax-review-message');
+            const statusSelect = form.find('select[name="maTrangThai"]');
+            const maDon = form.find('input[name="maDon"]').val();
+            const selectedStatus = statusSelect.val();
+
+            button.prop('disabled', true).text('Đang lưu...');
+            messageBox.removeClass('d-none alert-success alert-danger')
+                     .addClass('alert-info').text('Đang lưu xét duyệt...');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .done(function (response) {
+                if (!response || !response.success) {
+                    messageBox.removeClass('alert-info').addClass('alert-danger')
+                             .text(response && response.message ? response.message : 'Không thể lưu xét duyệt.');
+                    return;
+                }
+
+                const row = form.closest('tr');
+                row.attr('data-application-status', response.maTrangThai);
+
+                const badge = $('#status-' + maDon);
+                badge.text(response.tenTrangThai)
+                     .removeClass('bg-success bg-danger bg-info bg-warning text-dark bg-secondary');
+
+                if (response.maTrangThai == 4) badge.addClass('bg-success');
+                else if (response.maTrangThai == 5) badge.addClass('bg-danger');
+                else if (response.maTrangThai == 3) badge.addClass('bg-info text-dark');
+                else if (response.maTrangThai == 2) badge.addClass('bg-warning text-dark');
+                else badge.addClass('bg-secondary');
+
+                messageBox.removeClass('alert-info alert-danger')
+                         .addClass('alert-success').text(response.message);
+            })
+            .fail(function (xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Có lỗi xảy ra khi lưu xét duyệt. Vui lòng thử lại.';
+                messageBox.removeClass('alert-info alert-success')
+                         .addClass('alert-danger').text(message);
+            })
+            .always(function () {
+                button.prop('disabled', false).text('Lưu xét duyệt');
+            });
+        });
+    
+        // AJAX: lọc hồ sơ ứng tuyển theo trạng thái từ server.
+        $('#application-status-filter').on('change', function () {
+            const status = $(this).val();
+            const message = $('#application-filter-message');
+            message.text('Đang lọc...');
+            $.get('@Url.Action("FilterApplicationsAjax", "Employer", new { id = ViewBag.MaTin })',
+                { status: status === '' ? null : status })
+                .done(function (response) {
+                    if (!response || !response.success) { message.text('Không lọc được hồ sơ.'); return; }
+                    const allowed = new Set(response.applications.map(function (x) { return String(x.maDon); }));
+                    $('tbody tr[data-application-status]').each(function () {
+                        const row = $(this);
+                        const maDon = row.find('input[name="maDon"]').val();
+                        row.toggle(allowed.has(String(maDon)));
+                    });
+                    message.text('Đang hiển thị ' + response.count + ' hồ sơ.');
+                })
+                .fail(function () { message.text('Có lỗi khi lọc hồ sơ.'); });
+        });
+</script>
+}

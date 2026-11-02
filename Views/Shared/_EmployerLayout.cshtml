@@ -232,12 +232,38 @@
 
         @@media (max-width: 600px) {
             .employer-sidebar {
-                width: 135px;
-                flex-basis: 135px;
-                padding: 16px 6px;
+                width: 100%;
+                flex: 0 0 auto;
+                padding: 12px;
+                border-right: 0;
+                border-bottom: 1px solid #e2e6ec;
+            }
+
+            .employer-shell {
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            .employer-menu-title,
+            .employer-sidebar-bottom {
+                display: none;
+            }
+
+            .employer-menu {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .employer-menu a {
+                flex: 1 1 auto;
+                text-align: center;
+                padding: 10px 8px;
+                font-size: 13px;
             }
 
             .employer-main {
+                width: 100%;
                 padding: 14px 10px;
             }
 
@@ -247,6 +273,25 @@
 
             .employer-footer-links {
                 grid-template-columns: 1fr 1fr;
+            }
+
+            .employer-header-right {
+                flex-wrap: wrap;
+            }
+        }
+
+        @@media (max-width: 400px) {
+            .employer-footer-links {
+                grid-template-columns: 1fr;
+            }
+
+            .employer-header-left,
+            .employer-header-right {
+                width: 100%;
+            }
+
+            .employer-top-nav {
+                width: 100%;
             }
         }
     </style>
@@ -308,13 +353,15 @@
                     ▦ &nbsp; Tổng quan
                 </a>
 
-                 <a asp-controller="Employer"
-                   asp-action="SearchCandidates"
-                   class="@(currentController == "Employer" && currentAction == "SearchCandidates" ? "active" : "")">
+                <a asp-controller="Employer"
+                   asp-action="Jobs"
+                   class="active">
                     ▤ &nbsp; Tin tuyển dụng
                 </a>
 
-                <a asp-controller="Employer" asp-action="SearchCandidates">
+                <a asp-controller="Employer"
+                   asp-action="SearchCandidates"
+                   class="@(currentController == "Employer" && currentAction == "SearchCandidates" ? "active" : "")">
                     ♙ &nbsp; Ứng viên
                 </a>
 
