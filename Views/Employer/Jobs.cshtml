@@ -321,11 +321,7 @@
             </p>
         </div>
 
-        <a asp-controller="Employer"
-           asp-action="Create"
-           class="jobs-primary-btn">
-            + Đăng tin mới
-        </a>
+        <a asp-controller="Employer" asp-action="Create" class="jobs-primary-btn"><i class="fa-solid fa-plus"></i> Đăng tin mới</a>
     </div>
 
     <div class="jobs-stats">
@@ -356,15 +352,9 @@
             <h2 class="jobs-list-title">Danh sách tin</h2>
 
             <div class="jobs-filter-row">
-                <input type="text"
-                       id="jobSearch"
-                       class="form-control jobs-search"
-                       placeholder="⌕  Tìm theo chức danh..."
-                       aria-label="Tìm kiếm tin tuyển dụng" />
+                <input type="text" id="jobSearch" class="form-control jobs-search" placeholder="Tìm theo chức danh..." aria-label="Tìm kiếm tin tuyển dụng" />
 
-                <select id="jobStatusFilter"
-                        class="form-select"
-                        aria-label="Lọc theo trạng thái">
+                <select id="jobStatusFilter" class="form-select" aria-label="Lọc theo trạng thái">
                     <option value="">Tất cả trạng thái</option>
                     @foreach (var status in jobs
                         .Select(j => StatusLabel(j.TrangThai))
@@ -375,17 +365,8 @@
                     }
                 </select>
 
-                <button type="button"
-                        id="jobFilterButton"
-                        class="btn btn-outline-secondary jobs-filter-btn">
-                    Lọc
-                </button>
-
-                <button type="button"
-                        id="jobResetButton"
-                        class="btn btn-outline-secondary jobs-filter-btn">
-                    Đặt lại
-                </button>
+                <button type="button" id="jobFilterButton" class="btn btn-outline-secondary jobs-filter-btn">Lọc</button>
+                <button type="button" id="jobResetButton" class="btn btn-outline-secondary jobs-filter-btn">Đặt lại</button>
             </div>
 
             @if (jobs.Count == 0)
@@ -393,12 +374,7 @@
                 <div class="jobs-empty">
                     <h5>Chưa có tin tuyển dụng</h5>
                     <p>Hãy đăng tin đầu tiên để tìm kiếm ứng viên.</p>
-
-                    <a asp-controller="Employer"
-                       asp-action="Create"
-                       class="jobs-primary-btn">
-                        Đăng tin mới
-                    </a>
+                    <a asp-controller="Employer" asp-action="Create" class="jobs-primary-btn">Đăng tin mới</a>
                 </div>
             }
             else
@@ -419,54 +395,29 @@
                         <tbody id="jobTableBody">
                             @foreach (var job in jobs)
                             {
-                                <tr data-job-row
-                                    data-status="@StatusLabel(job.TrangThai)">
+                                <tr data-job-row data-status="@StatusLabel(job.TrangThai)">
                                     <td>#@job.MaTin</td>
-
                                     <td>
-                                        <div class="jobs-title">
-                                            @job.TieuDe
-                                        </div>
-                                        <div class="jobs-position">
-                                            @job.ViTri
-                                        </div>
+                                        <div class="jobs-title">@job.TieuDe</div>
+                                        <div class="jobs-position">@job.ViTri</div>
                                     </td>
-
+                                    <td>@job.NgayDang.ToString("dd/MM/yyyy")</td>
+                                    <td>@job.HanUngTuyen.ToString("dd/MM/yyyy")</td>
                                     <td>
-                                        @job.NgayDang.ToString("dd/MM/yyyy")
-                                    </td>
-
-                                    <td>
-                                        @job.HanUngTuyen.ToString("dd/MM/yyyy")
-                                    </td>
-
-                                    <td>
-                                        <span class="jobs-status"
-                                              data-status="@StatusLabel(job.TrangThai)">
-                                            @StatusLabel(job.TrangThai)
-                                        </span>
+                                        <span class="jobs-status" data-status="@StatusLabel(job.TrangThai)">@StatusLabel(job.TrangThai)</span>
                                     </td>
 
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center align-items-center gap-1">
-                                            <a asp-controller="Employer"
-                                               asp-action="Edit"
-                                               asp-route-id="@job.MaTin"
-                                               class="jobs-action jobs-action-edit">
+                                            <a asp-controller="Employer" asp-action="Edit" asp-route-id="@job.MaTin" class="jobs-action jobs-action-edit">
                                                <i class="fa-solid fa-pencil"></i> Sửa
                                             </a>
 
-                                            <a asp-controller="Employer"
-                                               asp-action="Delete"
-                                               asp-route-id="@job.MaTin"
-                                               class="jobs-action jobs-action-delete">
+                                            <a asp-controller="Employer" asp-action="Delete" asp-route-id="@job.MaTin" class="jobs-action jobs-action-delete">
                                                <i class="fa-regular fa-circle-xmark"></i> Xóa
                                             </a>
 
-                                            <a asp-controller="Employer"
-                                               asp-action="JobDetails"
-                                               asp-route-id="@job.MaTin"
-                                               class="jobs-action jobs-action-details">
+                                            <a asp-controller="Employer" asp-action="JobDetails" asp-route-id="@job.MaTin" class="jobs-action jobs-action-details">
                                                <i class="fa-solid fa-eye"></i> Xem
                                             </a>
                                         </div>
@@ -477,9 +428,7 @@
                     </table>
                 </div>
 
-                <div id="noSearchResult"
-                     class="jobs-empty"
-                     style="display:none;">
+                <div id="noSearchResult" class="jobs-empty" style="display:none;">
                     Không tìm thấy tin tuyển dụng phù hợp.
                 </div>
 

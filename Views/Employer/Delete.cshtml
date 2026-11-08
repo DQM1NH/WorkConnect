@@ -227,20 +227,12 @@
 </style>
 
 <div class="delete-page">
-    <a asp-controller="Employer" asp-action="Jobs"
-       style="display:inline-block;margin-bottom:14px;color:#245194;text-decoration:none;font-size:14px;font-weight:600;">
-        ← Quay lại danh sách tin
+    <a asp-controller="Employer" asp-action="Jobs" style="display:inline-block;margin-bottom:14px;color:#245194;text-decoration:none;font-size:14px;font-weight:600;">
+        <i class="fa-solid fa-arrow-left"></i>Quay lại danh sách tin
     </a>
-
-    <div class="delete-breadcrumb">
-        Nhà tuyển dụng / Tin tuyển dụng / Xóa tin
-    </div>
-
+    <div class="delete-breadcrumb">Nhà tuyển dụng / Tin tuyển dụng / Xóa tin</div>
     <h1 class="delete-heading">Xóa tin tuyển dụng</h1>
-
-    <p class="delete-subtitle">
-        Kiểm tra thông tin trước khi xác nhận xóa tin tuyển dụng.
-    </p>
+    <p class="delete-subtitle">Kiểm tra thông tin trước khi xác nhận xóa tin tuyển dụng</p>
 
     <div class="delete-warning">
         <div class="delete-warning-icon">!</div>
@@ -261,10 +253,7 @@
         </div>
 
         <div class="delete-card-body">
-            <div class="delete-job-title">
-                @Model.TieuDe
-            </div>
-
+            <div class="delete-job-title">@Model.TieuDe</div>
             <div class="delete-job-position">
                 Vị trí tuyển dụng: @(string.IsNullOrWhiteSpace(Model.ViTri)
                     ? "Chưa cập nhật"
@@ -309,25 +298,15 @@
         </div>
     </div>
 
-    <form asp-controller="Employer"
-          asp-action="Delete"
-          asp-route-id="@Model.MaTin"
-          method="post">
-
+    <form asp-controller="Employer" asp-action="Delete" asp-route-id="@Model.MaTin" method="post">
         @Html.AntiForgeryToken()
-
         <input type="hidden" name="id" value="@Model.MaTin" />
-
         <div class="delete-actions">
-            <a asp-controller="Employer"
-               asp-action="Jobs"
-               class="delete-btn delete-btn-cancel">
+            <a asp-controller="Employer" asp-action="Jobs" class="delete-btn delete-btn-cancel">
                 Hủy, quay lại danh sách
             </a>
 
-            <button type="submit" class="delete-btn delete-btn-confirm">
-                Xác nhận xóa tin
-            </button>
+            <button type="submit" class="delete-btn delete-btn-confirm">Xác nhận xóa tin</button>
         </div>
     </form>
 

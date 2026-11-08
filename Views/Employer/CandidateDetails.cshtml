@@ -36,9 +36,7 @@
             <h5>Mục tiêu nghề nghiệp</h5>
             <p>@(string.IsNullOrWhiteSpace(Model.MucTieuNgheNghiep) ? "Chưa cập nhật" : Model.MucTieuNgheNghiep)</p>
 
-            <a asp-controller="Employer"
-               asp-action="SearchCandidates"
-               class="btn btn-secondary mt-3">
+            <a asp-controller="Employer" asp-action="SearchCandidates" class="btn btn-secondary mt-3">
                 Quay lại danh sách ứng viên
             </a>
         </div>

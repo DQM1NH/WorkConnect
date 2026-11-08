@@ -13,9 +13,7 @@
             <p class="text-muted mb-0">@tieuDeTin</p>
         </div>
 
-        <a asp-controller="Employer"
-           asp-action="Jobs"
-           class="btn btn-outline-secondary">
+        <a asp-controller="Employer" asp-action="Jobs" class="btn btn-outline-secondary">
             Quay lại danh sách tin
         </a>
     </div>
@@ -24,16 +22,12 @@
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
-        </div>
+        <div class="alert alert-success">@TempData["Success"]</div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["Error"]
-        </div>
+        <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
         <div class="row g-2 mb-3 align-items-end">
@@ -51,16 +45,12 @@
         <div class="card-body">
             <h5 class="mb-3">
                 Danh sách hồ sơ
-                <span class="badge bg-primary">
-                    @(Model?.Count() ?? 0)
-                </span>
+                <span class="badge bg-primary">@(Model?.Count() ?? 0)</span>
             </h5>
 
             @if (Model == null || !Model.Any())
             {
-                <div class="alert alert-info mb-0">
-                    Chưa có ứng viên nộp hồ sơ cho tin tuyển dụng này.
-                </div>
+                <div class="alert alert-info mb-0">Chưa có ứng viên nộp hồ sơ cho tin tuyển dụng này</div>
             }
             else
             {
@@ -86,10 +76,8 @@
                             @foreach (var don in Model)
                             {
                                 stt++;
-
                                 <tr data-application-status="@don.MaTrangThai">
                                     <td>@stt</td>
-
                                     <td>
                                         <strong>
                                             @(!string.IsNullOrWhiteSpace(don.HoTen)
@@ -137,11 +125,7 @@
                                         {
                                             <span>@don.CV.TenTep</span>
                                             <div>
-                                                <a href="@don.CV.DuongDanTep"
-                                                   target="_blank"
-                                                   rel="noopener noreferrer">
-                                                    Mở CV
-                                                </a>
+                                                <a href="@don.CV.DuongDanTep" target="_blank" rel="noopener noreferrer"> Mở CV </a>
                                             </div>
                                         }
                                         else
@@ -151,25 +135,13 @@
                                     </td>
 
                                     <td>
-                                        <form asp-controller="Employer"
-                                              asp-action="ReviewApplication"
-                                              method="post"
-                                              class="ajax-review-form">
-
+                                        <form asp-controller="Employer" asp-action="ReviewApplication" method="post" class="ajax-review-form">
                                             @Html.AntiForgeryToken()
-
-                                            <input type="hidden"
-                                                   name="maDon"
-                                                   value="@don.MaDon" />
+                                            <input type="hidden" name="maDon" value="@don.MaDon" />
 
                                             <div class="mb-2">
-                                                <label class="form-label">
-                                                    Trạng thái mới
-                                                </label>
-
-                                                <select name="maTrangThai"
-                                                        class="form-select"
-                                                        required>
+                                                <label class="form-label">Trạng thái mới</label>
+                                                <select name="maTrangThai" class="form-select" required>
                                                     <option value="2"
                                                         selected="@(don.MaTrangThai == 2)">
                                                         Đang xem xét
@@ -193,55 +165,26 @@
                                             </div>
 
                                             <div class="mb-2">
-                                                <label class="form-label">
-                                                    Thời gian phỏng vấn
-                                                </label>
-
-                                                <input type="datetime-local"
-                                                       name="thoiGianPhongVan"
-                                                       class="form-control" />
+                                                <label class="form-label">Thời gian phỏng vấn</label>
+                                                <input type="datetime-local" name="thoiGianPhongVan" class="form-control" />
                                             </div>
 
                                             <div class="mb-2">
-                                                <label class="form-label">
-                                                    Địa điểm phỏng vấn
-                                                </label>
-
-                                                <input type="text"
-                                                       name="diaDiemPhongVan"
-                                                       class="form-control"
-                                                       maxlength="255"
-                                                       placeholder="Nhập địa điểm" />
+                                                <label class="form-label"> Địa điểm phỏng vấn </label>
+                                                <input type="text" name="diaDiemPhongVan" class="form-control" maxlength="255" placeholder="Nhập địa điểm" />
                                             </div>
 
                                             <div class="mb-2">
-                                                <label class="form-label">
-                                                    Ghi chú nội bộ
-                                                </label>
-
-                                                <textarea name="ghiChuNoiBo"
-                                                          class="form-control"
-                                                          rows="2"
-                                                          maxlength="1000"
-                                                          placeholder="Ghi chú riêng của nhà tuyển dụng"></textarea>
+                                                <label class="form-label"> Ghi chú nội bộ </label>
+                                                <textarea name="ghiChuNoiBo" class="form-control" rows="2" maxlength="1000" placeholder="Ghi chú riêng của nhà tuyển dụng"></textarea>
                                             </div>
 
                                             <div class="mb-2">
-                                                <label class="form-label">
-                                                    Phản hồi ứng viên
-                                                </label>
-
-                                                <textarea name="phanHoiUngVien"
-                                                          class="form-control"
-                                                          rows="2"
-                                                          maxlength="1000"
-                                                          placeholder="Nội dung phản hồi ứng viên"></textarea>
+                                                <label class="form-label">Phản hồi ứng viên</label>
+                                                <textarea name="phanHoiUngVien" class="form-control" rows="2" maxlength="1000" placeholder="Nội dung phản hồi ứng viên"></textarea>
                                             </div>
 
-                                            <button type="submit"
-                                                    class="btn btn-primary btn-sm">
-                                                Lưu xét duyệt
-                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-sm"> Lưu xét duyệt </button>
                                         </form>
                                     </td>
                                 </tr>
